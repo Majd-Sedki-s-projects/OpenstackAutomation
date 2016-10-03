@@ -22,8 +22,8 @@ def start_instance(nova, server_name, server_flavor, server_image):
     nova.servers.create(name=server_name, flavor=server_flavor, image=server_image)
 
 if __name__ == '__main__':
-    authenticate, novaclient, sess = start_auth()
-    # project = create_project(authenticate)
+    keystoneclient, novaclient, sess = start_auth()
+    # project = create_project(keystoneclient)
     flav = novaclient.flavors.find(name="m1.tiny")
     image = novaclient.images.find(name="cirros")
     start_instance(novaclient, server_name="my_server",server_flavor=flav,server_image=image)
