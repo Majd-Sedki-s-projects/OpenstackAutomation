@@ -49,7 +49,15 @@ var nodes, edges, network;
                 alert(err);
             }
         }
-
+        function returnJsonTop(){
+                $.ajax({
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    method: 'POST',
+                    url: '/NetworkTopology/json/',
+                    dataType: 'json',
+                    data: JSON.stringify(nodes.get(),null,4)
+                });         
+        }
         function addEdge() {
             try {
                 edges.add({

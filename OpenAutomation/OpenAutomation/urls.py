@@ -18,5 +18,6 @@ from django.contrib import admin
 
 urlpatterns = [
     url(r'^NetworkTopology/', include('OpenAutomation.NetworkTopology.urls')),
+    #url(r'^NetworkTopology/json/', include('OpenAutomation.NetworkTopology.urls')),
     url(r'^admin/', admin.site.urls),
 ]
