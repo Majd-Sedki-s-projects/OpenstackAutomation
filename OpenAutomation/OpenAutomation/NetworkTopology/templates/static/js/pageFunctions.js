@@ -50,12 +50,14 @@ var nodes, edges, network;
             }
         }
         function returnJsonTop(){
+                nodes: JSON.stringify(nodes.get(),null,4),
+                edges: JSON.stringify(edges.get(),null,4)  
+            }
                 $.ajax({
                     csrfmiddlewaretoken: '{{ csrf_token }}',
                     method: 'POST',
                     url: '/NetworkTopology/json/',
                     dataType: 'json',
-                    data: JSON.stringify(nodes.get(),null,4)
                 });         
         }
         function addEdge() {
