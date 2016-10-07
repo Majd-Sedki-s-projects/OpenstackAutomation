@@ -59,7 +59,7 @@ var nodes, edges, network;
                     method: 'POST',
                     url: '/NetworkTopology/json/',
                     dataType: 'json',
-                    data: dataObj["nodes"] + dataObj["edges"]
+                data: "[" + dataObj["nodes"] + "," + dataObj["edges"] + "]"
                 });         
         }
         function addEdge() {
