@@ -50,6 +50,7 @@ var nodes, edges, network;
             }
         }
         function returnJsonTop(){
+            var dataObj = {
                 nodes: JSON.stringify(nodes.get(),null,4),
                 edges: JSON.stringify(edges.get(),null,4)  
             }
@@ -58,6 +59,7 @@ var nodes, edges, network;
                     method: 'POST',
                     url: '/NetworkTopology/json/',
                     dataType: 'json',
+                    data: dataObj["nodes"] + dataObj["edges"]
                 });         
         }
         function addEdge() {
