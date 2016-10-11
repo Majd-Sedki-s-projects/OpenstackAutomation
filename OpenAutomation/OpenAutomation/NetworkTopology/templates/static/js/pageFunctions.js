@@ -34,7 +34,9 @@ var nodes, edges, network;
             try {
                 nodes.update({
                     id: document.getElementById('node-id').value,
-                    label: document.getElementById('node-label').value
+                    label: document.getElementById('node-label').value,
+                    image: "/static/images/" + selectedDevice + ".png",
+					shape: "image"
                 });
             }
             catch (err) {

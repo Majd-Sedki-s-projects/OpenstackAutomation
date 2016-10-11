@@ -32,7 +32,7 @@ html, body {
         input[type=text], pre {
             border: 1px solid lightgray;
         }
-
+        
         pre {
             margin: 0;
             padding: 5px;

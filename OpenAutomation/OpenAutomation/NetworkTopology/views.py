@@ -3,7 +3,7 @@ from django.shortcuts import render_to_response
 from django.views.decorators.csrf import csrf_exempt
 import ast
 from ..OpenstackCommunication.Authenticate import Authenticate
-from novaclient import client as nova_client
+from ..OpenstackCommunication.StartInstance import StartInstance
 
 
 def index(request):
@@ -14,22 +14,18 @@ def index(request):
 def returnjson(request):
     if request.is_ajax():
         request_data = request.body
-        test = str(request_data.decode())
-        data = ast.literal_eval(test)
+        data = ast.literal_eval(str(request_data.decode()))
         node_info = data[0]
         edge_info = data[1]
         #Temporary Values - This would be filled in by user input later.
-        test = Authenticate(auth="http://192.168.2.201:5000/v3", user="admin", passwd="adb945659bff445a",
-                       proj_name="admin", user_domain="default", project_domain="default")
-        session = test.start_auth()
+        auth = Authenticate(auth="http://192.168.2.201:5000/v3", user="admin", passwd="adb945659bff445a",
+                            proj_name="admin", user_domain="default", project_domain="default")
+        session = auth.start_auth()
         for device_id in node_info:
-            print(device_id.get("id"))
-            start_instance(session, device_id.get("id"))
+            if 'vm' in device_id.get("image"):
+                print(device_id.get("id"))
+                new_instance = StartInstance(session)
+                nova = new_instance.start_instance(server_name=device_id.get("id"), image="cirros", size="m1.small")
+            else:
+                print("Only VM creation is currently supported")
         return HttpResponse("OK")
-
-
-def start_instance(session,server_name):
-    nova = nova_client.Client("2.1", session=session)
-    flavour = nova.flavors.find(name="m1.tiny")
-    image = nova.images.find(name="cirros")
-    nova.servers.create(name=str(server_name), flavor=flavour, image=image)
