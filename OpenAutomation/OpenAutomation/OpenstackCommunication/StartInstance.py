@@ -1,6 +1,5 @@
 from novaclient import client as nova_client
 
-
 class StartInstance(object):
     def __init__(self, sess):
         self.session = sess
@@ -9,7 +8,9 @@ class StartInstance(object):
         nova = nova_client.Client("2.1", session=self.session)
         flavour = nova.flavors.find(name=size)
         image = nova.images.find(name=image)
-        nova.servers.create(name=str(server_name), flavor=flavour, image=image)
+        #network = nova_client.networks.find(name="public")
+        nova.servers.create(name=str(server_name), flavor=flavour, image=image,
+							nics=[{'net-id': "7dd889fc-ef10-4fb5-8c71-35738d627846"}])
         return nova
 
     def add_security_to_server(self, nova, server_name, security_group_name):
