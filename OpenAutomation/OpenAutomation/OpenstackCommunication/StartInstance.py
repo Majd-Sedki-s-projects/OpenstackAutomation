@@ -10,7 +10,7 @@ class StartInstance(object):
         image = nova.images.find(name=image)
         #network = nova_client.networks.find(name="public")
         nova.servers.create(name=str(server_name), flavor=flavour, image=image,
-                            userdata=userdata,
+                            userdata=userdata, #Userdata to add cloud-init file
 							nics=[{'net-id': "6c9b77ff-3341-4000-8e65-1e71a720e6cb"}])
         return nova
 
