@@ -11,7 +11,7 @@ class StartInstance(object):
         #network = nova_client.networks.find(name="public")
         nova.servers.create(name=str(server_name), flavor=flavour, image=image,
                             userdata=userdata, #Userdata to add cloud-init file
-							nics=[{'net-id': "6c9b77ff-3341-4000-8e65-1e71a720e6cb"}])
+                            nics=[{'net-id': "0a0a844d-91ea-49a3-924e-afd99a70ab3c"}])
         return nova
 
     def add_security_to_server(self, nova, server_name, security_group_name):
