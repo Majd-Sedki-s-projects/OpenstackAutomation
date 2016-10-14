@@ -1,0 +1,10 @@
+#!/bin/bash
+#Cloud-Init for Ubuntu Apache2 server
+
+echo "Running Update"
+apt-get install -y Update
+
+echo "Installing Apache2"
+apt-get install -y apache2
+
+exit 0
