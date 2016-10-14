@@ -9,3 +9,8 @@ class CreateRouter(object):
         neutron = neutron_client.Client(session=self.session)
         neutron.create_router({'router':body})
         return neutron
+
+    def delete_router(self, routerID):
+        neutron = neutron_client.Client(session=self.session)
+        neutron.delete_router(routerID)
+        return neutron
