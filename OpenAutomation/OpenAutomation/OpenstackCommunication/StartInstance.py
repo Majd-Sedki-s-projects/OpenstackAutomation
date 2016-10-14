@@ -4,12 +4,13 @@ class StartInstance(object):
     def __init__(self, sess):
         self.session = sess
 
-    def start_instance(self, server_name, image, size):
+    def start_instance(self, server_name, image, size, userdata):
         nova = nova_client.Client("2.1", session=self.session)
         flavour = nova.flavors.find(name=size)
         image = nova.images.find(name=image)
         #network = nova_client.networks.find(name="public")
         nova.servers.create(name=str(server_name), flavor=flavour, image=image,
+                            userdata=userdata,
 							nics=[{'net-id': "0a0a844d-91ea-49a3-924e-afd99a70ab3c"}])
         return nova
 
