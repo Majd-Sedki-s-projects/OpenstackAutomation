@@ -1,5 +1,5 @@
 var nodes, edges, network;
-
+var selectedDevice;
         // convenience method to stringify a JSON object
         function toJSON(obj) {
             return JSON.stringify(obj, null, 4);
@@ -11,15 +11,16 @@ var nodes, edges, network;
 			for (var i = 0, length = radios.length; i < length; i++) {
 				if (radios[i].checked) {
 					// do whatever you want with the checked radio
-					var selectedDevice = radios[i].value;
+					selectedDevice = radios[i].value;
 
 					// only one radio can be logically checked, don't check the rest
 					break;
 				}
 			}
+            
             try {
                 nodes.add({
-                    id: document.getElementById('node-id').value,
+                    id: selectedDevice + '-' + document.getElementById('node-id').value,
                     label: document.getElementById('node-label').value,
 					image: "/static/images/" + selectedDevice + ".png",
 					shape: "image"
@@ -33,7 +34,7 @@ var nodes, edges, network;
         function updateNode() {
             try {
                 nodes.update({
-                    id: document.getElementById('node-id').value,
+                    id: selectedDevice + '-' + document.getElementById('node-id').value,
                     label: document.getElementById('node-label').value,
                     image: "/static/images/" + selectedDevice + ".png",
 					shape: "image"
@@ -45,7 +46,7 @@ var nodes, edges, network;
         }
         function removeNode() {
             try {
-                nodes.remove({id: document.getElementById('node-id').value});
+                nodes.remove({id: selectedDevice + '-' + document.getElementById('node-id').value});
             }
             catch (err) {
                 alert(err);
@@ -66,11 +67,18 @@ var nodes, edges, network;
         }
         function addEdge() {
             try {
+                var nodeFrom = selectedDevice + '-' + document.getElementById('edge-from').value
+                var nodeTo = selectedDevice + '-' + document.getElementById('edge-to').value
+                
+                if (nodeFrom.includes('vm') && nodeTo.includes('vm')){
+                    alert("You cannot connect two VMs together.")
+                }else{
                 edges.add({
                     id: document.getElementById('edge-id').value,
-                    from: document.getElementById('edge-from').value,
-                    to: document.getElementById('edge-to').value
-                });
+                    from: selectedDevice + '-' + document.getElementById('edge-from').value,
+                    to: selectedDevice + '-' + document.getElementById('edge-to').value
+                })
+              };
             }
             catch (err) {
                 alert(err);
@@ -80,8 +88,8 @@ var nodes, edges, network;
             try {
                 edges.update({
                     id: document.getElementById('edge-id').value,
-                    from: document.getElementById('edge-from').value,
-                    to: document.getElementById('edge-to').value
+                    from: selectedDevice + '-' + document.getElementById('edge-from').value,
+                    to: selectedDevice + '-' + document.getElementById('edge-to').value
                 });
             }
             catch (err) {

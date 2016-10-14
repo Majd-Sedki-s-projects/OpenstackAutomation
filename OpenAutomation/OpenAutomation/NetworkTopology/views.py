@@ -19,7 +19,7 @@ def returnjson(request):
         node_info = data[0]
         edge_info = data[1]
         #Temporary Values - This would be filled in by user input later.
-        auth = Authenticate(auth="http://10.14.192.248:5000/v3", user="admin", passwd="24df4e1f03fe4932",
+        auth = Authenticate(auth="http://192.168.2.201:5000/v3", user="admin", passwd="adb945659bff445a",
                             proj_name="admin", user_domain="default", project_domain="default")
         session = auth.start_auth()
         for device_id in node_info:
