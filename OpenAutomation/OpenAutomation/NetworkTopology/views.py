@@ -34,7 +34,8 @@ def returnjson(request):
             elif 'router' in device_id.get("image"):
                 print(device_id.get("id"))
                 new_router = CreateRouter(session)
-                neutron = new_router.create_router(name=device_id.get("id"))
+                body = {'name': device_id.get("id")}
+                neutron = new_router.create_router(body)
             elif 'apache' in device_id.get("image"):
                 print(device_id.get("id"))
                 new_instance = StartInstance(session)
