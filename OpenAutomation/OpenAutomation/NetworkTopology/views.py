@@ -4,6 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from ..OpenstackCommunication.Authenticate import Authenticate
 from ..OpenstackCommunication.StartInstance import StartInstance
 from ..OpenstackCommunication.CreateRouter import CreateRouter
+from ..OpenstackCommunication.CreateNetwork import CreateNetwork
 from ast import literal_eval
 import os
 
@@ -43,6 +44,11 @@ def returnjson(request):
                 cloud_init = open(PROJECT_PATH + '/CloudInit/apache_cloudinit.txt')
                 nova = new_instance.start_instance(server_name=device_id.get("id"), image="Ubuntu 16.04 LTS",
                                                    size="m1.small", userdata=cloud_init)
+            elif 'network' in device_id.get("image"):
+                print(device_id.get("image"))
+                new_network = CreateNetwork(session)
+                body = {'name': device_id.get("id"),'admin_state_up': True}
+                neutron = new_network.create_network(body)
             else:
                 print("Only VM creation is currently supported")
         return HttpResponse("OK")
