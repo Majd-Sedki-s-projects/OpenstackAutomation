@@ -17,3 +17,8 @@ class StartInstance(object):
     def add_security_to_server(self, nova, server_name, security_group_name):
         server = nova.servers.find(name=server_name)
         nova.servers.add_security_group(server, security_group_name)
+
+    def delete_instance_byId(self, instanceId):
+        nova = nova_client.Client("2.1", session=self.session)
+        nova.servers.delete(instanceId)
+        

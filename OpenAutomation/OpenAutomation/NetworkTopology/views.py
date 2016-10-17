@@ -5,6 +5,7 @@ from ..OpenstackCommunication.Authenticate import Authenticate
 from ..OpenstackCommunication.StartInstance import StartInstance
 from ..OpenstackCommunication.CreateRouter import CreateRouter
 from ..OpenstackCommunication.CreateNetwork import CreateNetwork
+from ..OpenstackCommunication.FloatingIP import FloatingIP
 from ast import literal_eval
 import os
 
@@ -40,10 +41,11 @@ def returnjson(request):
             elif 'apache' in device_id.get("image"):
                 print(device_id.get("id"))
                 new_instance = StartInstance(session)
-                #Couldn't get relative directory to work, need to look at this again
                 cloud_init = open(PROJECT_PATH + '/CloudInit/apache_cloudinit.txt')
                 nova = new_instance.start_instance(server_name=device_id.get("id"), image="Ubuntu 16.04 LTS",
                                                    size="m1.small", userdata=cloud_init)
+                new_floatingip = FloatingIP(session)
+                new_floatingip.assignFloatingIP(name=device_id.get("id"))
             elif 'network' in device_id.get("image"):
                 print(device_id.get("image"))
                 new_network = CreateNetwork(session)
