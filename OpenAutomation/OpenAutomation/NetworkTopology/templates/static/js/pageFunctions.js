@@ -1,7 +1,10 @@
 var nodes, edges, network;
 var selectedDevice;
+var removedNodes = [];
+var deployedNodesAndEdges, removedNodesAndEdges = {};
 var firstSelected = [];
 var secondSelected = [];
+//removedNodes.length = 0;
         // convenience method to stringify a JSON object
         function toJSON(obj) {
             return JSON.stringify(obj, null, 4);
@@ -19,11 +22,11 @@ var secondSelected = [];
 					break;
 				}
 			}
-            
             try {
                 nodes.add({
                     id: selectedDevice + '-' + document.getElementById('node-id').value,
                     type: selectedDevice,
+                    deployed: "false",
                     label: document.getElementById('node-label').value,
 					image: "/static/images/" + selectedDevice + ".png",
 					shape: "image"
@@ -49,14 +52,15 @@ var secondSelected = [];
         }
         function removeNode() {
             try {
-                nodes.remove({id: document.getElementById('node-id').value});
+                removedNodes[removedNodes.length] = selectedDevice + '-' + document.getElementById('node-id').value
+                nodes.remove({id: selectedDevice + '-' + document.getElementById('node-id').value});
             }
             catch (err) {
                 alert(err);
             }
         }
         function returnJsonTop(){
-            var dataObj = {
+            deployedNodesAndEdges = {
                 nodes: JSON.stringify(nodes.get(),null,4),
                 edges: JSON.stringify(edges.get(),null,4)  
             }
@@ -65,8 +69,24 @@ var secondSelected = [];
                     method: 'POST',
                     url: '/NetworkTopology/json/',
                     dataType: 'json',
-                    data: "[" + dataObj["nodes"] + "," + dataObj["edges"] + "]"
-                });         
+                    data: "[" + deployedNodesAndEdges["nodes"] + "," + deployedNodesAndEdges["edges"] + "]"
+                });
+                for (var property in nodes._data){
+                    nodes._data[property]["deployed"] = "true";
+                }
+        }
+        function tearDown(){
+            //removedNodesAndEdges = {
+            //    removedNodes: JSON.stringify(removedNodes.get(),null,4),
+                //removedEdges: JSON.stringify(removedEdges.get(),null,4)
+            //}
+            $.ajax({
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    method: 'POST',
+                    url: '/NetworkTopology/json/',
+                    dataType: 'json',
+                    data: JSON.stringify(removedNodes)
+                });
         }
         function addEdge(nodeID, firstNode, secondNode) {
             try {
@@ -100,7 +120,6 @@ var secondSelected = [];
                 alert(err);
             }
         }
-
         function draw() {
             // create an array with nodes
             nodes = new vis.DataSet();

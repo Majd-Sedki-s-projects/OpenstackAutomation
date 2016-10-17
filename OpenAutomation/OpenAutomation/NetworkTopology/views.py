@@ -22,39 +22,44 @@ def returnjson(request):
     if request.is_ajax():
         request_data = request.body
         data = literal_eval(str(request_data.decode()))
-        node_info = data[0]
-        edge_info = data[1]
-        #Temporary Values - This would be filled in by user input later.
-        auth = Authenticate(auth="http://10.14.192.248:5000/v3", user="admin", passwd="24df4e1f03fe4932",
+        auth = Authenticate(auth="http://167.114.191.47:5000/v3", user="admin", passwd="4c910a1e667f4369",
                             proj_name="admin", user_domain="default", project_domain="default")
         session = auth.start_auth()
-        for device_id in node_info:
-            if 'vm' in device_id.get("image"):
-                print(device_id.get("id"))
-                new_instance = StartInstance(session)
-                nova = new_instance.start_instance(server_name=device_id.get("id"), image="cirros", size="m1.small",
-                                                   userdata="")
-            elif 'router' in device_id.get("image"):
-                print(device_id.get("id"))
-                new_router = CreateRouter(session)
-                body = {'name': device_id.get("id")}
-                neutron = new_router.create_router(body)
-            elif 'apache' in device_id.get("image"):
-                print(device_id.get("id"))
-                new_instance = StartInstance(session)
-                cloud_init = open(PROJECT_PATH + '/CloudInit/apache_cloudinit.txt')
-                nova = new_instance.start_instance(server_name=device_id.get("id"), image="Ubuntu 16.04 LTS",
-                                                   size="m1.small", userdata=cloud_init)
-                time.sleep(5) #Wait to allow server to complete build (Can't assign FIP until built)
-                new_floatingip = FloatingIP(session)
-                server = new_floatingip.getServer(name=device_id.get("id"))
-                new_floatingip.assignFloatingIP(server)
+        new_instance = StartInstance(session)
+        if isinstance(data[0][0], dict):
+            node_info = data[0]
+            edge_info = data[1]
+            #Temporary Values - This would be filled in by user input later.
+            for device_id in node_info:
+                if 'vm' in device_id.get("image"):
+                    print(device_id.get("id"))
+                    nova = new_instance.start_instance(server_name=device_id.get("id"), image="cirros", size="m1.small",
+                                                       userdata="")
+                elif 'router' in device_id.get("image"):
+                    print(device_id.get("id"))
+                    new_router = CreateRouter(session)
+                    body = {'name': device_id.get("id")}
+                    neutron = new_router.create_router(body)
+                elif 'apache' in device_id.get("image"):
+                    print(device_id.get("id"))
+                    cloud_init = open(PROJECT_PATH + '/CloudInit/apache_cloudinit.txt')
+                    nova = new_instance.start_instance(server_name=device_id.get("id"), image="Ubuntu 16.04 LTS",
+                                                       size="m1.small", userdata=cloud_init)
+                    time.sleep(5) #Wait to allow server to complete build (Can't assign FIP until built)
+                    new_floatingip = FloatingIP(session)
+                    server = new_floatingip.getServer(name=device_id.get("id"))
+                    new_floatingip.assignFloatingIP(server)
 
-            elif 'network' in device_id.get("image"):
-                print(device_id.get("image"))
-                new_network = CreateNetwork(session)
-                body = {'name': device_id.get("id"),'admin_state_up': True}
-                neutron = new_network.create_network(body)
-            else:
-                print("Only VM creation is currently supported")
+                elif 'network' in device_id.get("image"):
+                    print(device_id.get("image"))
+                    new_network = CreateNetwork(session)
+                    body = {'name': device_id.get("id"),'admin_state_up': True}
+                    neutron = new_network.create_network(body)
+                else:
+                    print("Only VM creation is currently supported")
+        else:
+            for instance in data:
+                new_instance.delete_instance_by_name(instance_name=instance)
+            print("Instance removed")
         return HttpResponse("OK")
+
