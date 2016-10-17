@@ -1,5 +1,7 @@
 var nodes, edges, network;
 var selectedDevice;
+var firstSelected = [];
+var secondSelected = [];
         // convenience method to stringify a JSON object
         function toJSON(obj) {
             return JSON.stringify(obj, null, 4);
@@ -20,7 +22,8 @@ var selectedDevice;
             
             try {
                 nodes.add({
-                    id: selectedDevice + '-' + document.getElementById('node-id').value,
+                    id: document.getElementById('node-id').value,
+                    type: selectedDevice,
                     label: document.getElementById('node-label').value,
 					image: "/static/images/" + selectedDevice + ".png",
 					shape: "image"
@@ -34,7 +37,7 @@ var selectedDevice;
         function updateNode() {
             try {
                 nodes.update({
-                    id: selectedDevice + '-' + document.getElementById('node-id').value,
+                    id: document.getElementById('node-id').value,
                     label: document.getElementById('node-label').value,
                     image: "/static/images/" + selectedDevice + ".png",
 					shape: "image"
@@ -46,7 +49,7 @@ var selectedDevice;
         }
         function removeNode() {
             try {
-                nodes.remove({id: selectedDevice + '-' + document.getElementById('node-id').value});
+                nodes.remove({id: document.getElementById('node-id').value});
             }
             catch (err) {
                 alert(err);
@@ -65,21 +68,14 @@ var selectedDevice;
                     data: "[" + dataObj["nodes"] + "," + dataObj["edges"] + "]"
                 });         
         }
-        function addEdge() {
+        function addEdge(nodeID, firstNode, secondNode) {
             try {
-                var nodeFrom = selectedDevice + '-' + document.getElementById('edge-from').value
-                var nodeTo = selectedDevice + '-' + document.getElementById('edge-to').value
-                
-                if (nodeFrom.includes('vm') && nodeTo.includes('vm')){
-                    alert("You cannot connect two VMs together.")
-                }else{
                 edges.add({
-                    id: document.getElementById('edge-id').value,
-                    from: selectedDevice + '-' + document.getElementById('edge-from').value,
-                    to: selectedDevice + '-' + document.getElementById('edge-to').value
-                })
-              };
-            }
+                    id: nodeID,
+                    from: firstNode,
+                    to: secondNode
+                });
+              }
             catch (err) {
                 alert(err);
             }
@@ -88,8 +84,8 @@ var selectedDevice;
             try {
                 edges.update({
                     id: document.getElementById('edge-id').value,
-                    from: selectedDevice + '-' + document.getElementById('edge-from').value,
-                    to: selectedDevice + '-' + document.getElementById('edge-to').value
+                    from: document.getElementById('edge-from').value,
+                    to: document.getElementById('edge-to').value
                 });
             }
             catch (err) {
@@ -128,7 +124,29 @@ var selectedDevice;
                 nodes: nodes,
                 edges: edges
             };
-            var options = {};
+            var options = {interaction:{
+                                hover:true,
+                                selectable:true
+            }};
             network = new vis.Network(container, data, options);
+            network.setOptions(options);
+         
 
+            var mySelectionOrder = [];
+            var previouslySelected = [];
+            network.on('selectNode', function(p) {
+                if(firstSelected.length == 0){
+                    firstSelected = network.getSelectedNodes();
+                }
+                network.on('selectNode', function(p) {
+                    secondSelected = network.getSelectedNodes();
+                    if(firstSelected.length == 1 && secondSelected.length == 1){
+                        var nodeID = firstSelected + "-" + secondSelected
+                        addEdge(nodeID,firstSelected[0],secondSelected[0]);
+                        firstSelected = [];
+                        secondSelected = [];
+                    }
+                });
+            });
         }
+        
