@@ -8,6 +8,7 @@ from ..OpenstackCommunication.CreateNetwork import CreateNetwork
 from ..OpenstackCommunication.FloatingIP import FloatingIP
 from ast import literal_eval
 import os
+import time
 
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 
@@ -44,8 +45,11 @@ def returnjson(request):
                 cloud_init = open(PROJECT_PATH + '/CloudInit/apache_cloudinit.txt')
                 nova = new_instance.start_instance(server_name=device_id.get("id"), image="Ubuntu 16.04 LTS",
                                                    size="m1.small", userdata=cloud_init)
+                time.sleep(5) #Wait to allow server to complete build (Can't assign FIP until built)
                 new_floatingip = FloatingIP(session)
-                new_floatingip.assignFloatingIP(name=device_id.get("id"))
+                server = new_floatingip.getServer(name=device_id.get("id"))
+                new_floatingip.assignFloatingIP(server)
+
             elif 'network' in device_id.get("image"):
                 print(device_id.get("image"))
                 new_network = CreateNetwork(session)
