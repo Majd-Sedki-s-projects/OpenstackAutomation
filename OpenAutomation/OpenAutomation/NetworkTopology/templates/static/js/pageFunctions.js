@@ -22,7 +22,7 @@ var secondSelected = [];
             
             try {
                 nodes.add({
-                    id: document.getElementById('node-id').value,
+                    id: selectedDevice + '-' + document.getElementById('node-id').value,
                     type: selectedDevice,
                     label: document.getElementById('node-label').value,
 					image: "/static/images/" + selectedDevice + ".png",
@@ -130,23 +130,25 @@ var secondSelected = [];
             }};
             network = new vis.Network(container, data, options);
             network.setOptions(options);
-         
 
-            var mySelectionOrder = [];
-            var previouslySelected = [];
-            network.on('selectNode', function(p) {
-                if(firstSelected.length == 0){
-                    firstSelected = network.getSelectedNodes();
-                }
-                network.on('selectNode', function(p) {
-                    secondSelected = network.getSelectedNodes();
-                    if(firstSelected.length == 1 && secondSelected.length == 1){
-                        var nodeID = firstSelected + "-" + secondSelected
-                        addEdge(nodeID,firstSelected[0],secondSelected[0]);
-                        firstSelected = [];
-                        secondSelected = [];
-                    }
-                });
-            });
-        }
-        
+                    network.on('selectNode', function(p) {
+                        if(firstSelected.length == 0){
+                            firstSelected = network.getSelectedNodes();
+                        }else{
+                            secondSelected = network.getSelectedNodes();
+                        }
+                        if((firstSelected[0].includes('vm-') && secondSelected[0].includes('vm-'))||
+                            (firstSelected[0].includes('vm-') && secondSelected[0].includes('apache-'))||
+                             (firstSelected[0].includes('apache-') && secondSelected[0].includes('vm-'))){
+                            firstSelected = [];
+                            secondSelected = [];
+                            alert("You cannot connect two VMs");
+                        }
+                        if(firstSelected.length == 1 && secondSelected.length == 1){
+                            var nodeID = firstSelected + "-" + secondSelected
+                            addEdge(nodeID,firstSelected[0],secondSelected[0]);
+                            firstSelected = [];
+                            secondSelected = [];
+                        }
+                    })
+        };   
