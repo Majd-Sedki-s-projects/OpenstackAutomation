@@ -57,6 +57,7 @@ def returnjson(request):
                     neutron = new_network.create_network(body)
                 else:
                     print("Only VM creation is currently supported")
+            
         else:
             for instance in data:
                 new_instance.delete_instance_by_name(instance_name=instance)

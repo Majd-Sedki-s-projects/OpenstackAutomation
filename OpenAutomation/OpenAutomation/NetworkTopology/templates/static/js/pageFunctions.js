@@ -156,18 +156,20 @@ var secondSelected = [];
                         }else{
                             secondSelected = network.getSelectedNodes();
                         }
-                        if((firstSelected[0].includes('vm-') && secondSelected[0].includes('vm-'))||
-                            (firstSelected[0].includes('vm-') && secondSelected[0].includes('apache-'))||
-                             (firstSelected[0].includes('apache-') && secondSelected[0].includes('vm-'))){
-                            firstSelected = [];
-                            secondSelected = [];
-                            alert("You cannot connect two VMs");
-                        }
                         if(firstSelected.length == 1 && secondSelected.length == 1){
-                            var nodeID = firstSelected + "-" + secondSelected
-                            addEdge(nodeID,firstSelected[0],secondSelected[0]);
-                            firstSelected = [];
-                            secondSelected = [];
+                                if((!firstSelected[0].includes('network-') && !secondSelected[0].includes('network-')) ||
+                                    (firstSelected[0].includes('network-') && secondSelected[0].includes('network-'))){
+                                        firstSelected = [];
+                                        secondSelected = [];
+                                        alert("One of the two nodes you are connecting must be a network.");
+                                }else{
+                                        var nodeID = firstSelected + "-" + secondSelected
+                                        addEdge(nodeID,firstSelected[0],secondSelected[0]);
+                                        firstSelected = [];
+                                        secondSelected = [];
+                            }
                         }
-                    })
+                    });
         };   
+        
+        
