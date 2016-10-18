@@ -7,14 +7,14 @@ class StartInstance(object):
     def __init__(self, sess):
         self.session = sess
 
-    def start_instance(self, server_name, image, size,userdata):
+    def start_instance(self, server_name, image, size, userdata, network_id):
         nova = nova_client.Client("2.1", session=self.session)
         flavour = nova.flavors.find(name=size)
         image = nova.images.find(name=image)
         #network = nova_client.networks.find(name="public")
         nova.servers.create(name=str(server_name), flavor=flavour, image=image,
                             userdata=userdata, #Userdata to add cloud-init file
-                            nics=[{'net-id': "7dd889fc-ef10-4fb5-8c71-35738d627846"}])
+                            nics=[{'net-id': network_id}])
         return nova
  
     def add_security_to_server(self, server_name, security_group_name):

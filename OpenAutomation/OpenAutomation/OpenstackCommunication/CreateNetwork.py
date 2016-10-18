@@ -1,12 +1,14 @@
 from neutronclient.v2_0 import client as neutron_client
 
+
 class CreateNetwork(object):
     def __init__(self, sess):
         self.session = sess
 
-    def create_network(self, body):
+    def create_network(self, name, body):
         neutron = neutron_client.Client(session=self.session)
-        neutron.create_network({'network':body})
+        if len(neutron.list_networks(name=name)["networks"]) > 0:
+            neutron.create_network({'network':body})
         return neutron
 
     def delete_network_byName(self, name):
@@ -20,3 +22,8 @@ class CreateNetwork(object):
         neutron = neutron_client.Client(session=self.session)
         neutron.delete_network(id)
         print("Network ID: " + id + " has been removed.")
+
+    def get_network_id(self, name):
+        neutron = neutron_client.Client(session=self.session)
+        network_id = neutron.list_networks(name=name)["networks"][0]["id"]
+        return network_id

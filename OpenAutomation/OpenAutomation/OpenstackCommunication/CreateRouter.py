@@ -1,5 +1,6 @@
 from neutronclient.v2_0 import client as neutron_client
 
+
 class CreateRouter(object):
     def __init__(self, sess):
         self.session = sess

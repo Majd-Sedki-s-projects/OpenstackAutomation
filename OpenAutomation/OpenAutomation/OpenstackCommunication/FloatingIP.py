@@ -1,6 +1,7 @@
 from neutronclient.v2_0 import client as neutron_client
 from novaclient import client as nova_client
 
+
 class FloatingIP(object):
     def __init__(self, sess):
         self.session = sess
