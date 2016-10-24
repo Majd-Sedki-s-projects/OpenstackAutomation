@@ -4,7 +4,6 @@ var removedNodes = [];
 var deployedNodesAndEdges, removedNodesAndEdges = {};
 var firstSelected = [];
 var secondSelected = [];
-//removedNodes.length = 0;
         // convenience method to stringify a JSON object
         function toJSON(obj) {
             return JSON.stringify(obj, null, 4);
@@ -17,14 +16,13 @@ var secondSelected = [];
 				if (radios[i].checked) {
 					// do whatever you want with the checked radio
 					selectedDevice = radios[i].value;
-
 					// only one radio can be logically checked, don't check the rest
 					break;
 				}
 			}
             try {
                 nodes.add({
-                    id: selectedDevice + '-' + document.getElementById('node-id').value,
+                    id: document.getElementById('node-id').value,
                     type: selectedDevice,
                     deployed: "false",
                     label: document.getElementById('node-label').value,
@@ -52,8 +50,16 @@ var secondSelected = [];
         }
         function removeNode() {
             try {
-                removedNodes[removedNodes.length] = selectedDevice + '-' + document.getElementById('node-id').value
-                nodes.remove({id: selectedDevice + '-' + document.getElementById('node-id').value});
+                var nodeToRemove = document.getElementById('node-id').value
+                removedNodes[removedNodes.length] = nodeToRemove
+                nodes.remove({id: nodeToRemove});
+                for (var property in edges._data){
+                    if (edges._data[property]["to"] == nodeToRemove){
+                        edges.remove({id: edges._data[property]["id"]})
+                    }else if (edges._data[property]["from"] == nodeToRemove){
+                        edges.remove({id: edges._data[property]["id"]})
+                    }
+                }
             }
             catch (err) {
                 alert(err);
@@ -76,10 +82,6 @@ var secondSelected = [];
                 }
         }
         function tearDown(){
-            //removedNodesAndEdges = {
-            //    removedNodes: JSON.stringify(removedNodes.get(),null,4),
-                //removedEdges: JSON.stringify(removedEdges.get(),null,4)
-            //}
             $.ajax({
                     csrfmiddlewaretoken: '{{ csrf_token }}',
                     method: 'POST',
@@ -157,19 +159,38 @@ var secondSelected = [];
                             secondSelected = network.getSelectedNodes();
                         }
                         if(firstSelected.length == 1 && secondSelected.length == 1){
-                                if((!firstSelected[0].includes('network-') && !secondSelected[0].includes('network-')) ||
-                                    (firstSelected[0].includes('network-') && secondSelected[0].includes('network-'))){
-                                        firstSelected = [];
-                                        secondSelected = [];
-                                        alert("One of the two nodes you are connecting must be a network.");
-                                }else{
-                                        var nodeID = firstSelected + "-" + secondSelected
-                                        addEdge(nodeID,firstSelected[0],secondSelected[0]);
-                                        firstSelected = [];
-                                        secondSelected = [];
+                                var linkCreated = false;
+                                upperLoop:
+                                for (var property in nodes._data){
+                                    if (nodes._data[property]["id"] == firstSelected[0] && nodes._data[property]["type"] == "network"){
+                                        for (var property in nodes._data){
+                                            if(nodes._data[property]["id"] == secondSelected[0] && nodes._data[property]["type"] != "network"){
+                                                var nodeID = firstSelected + "-" + secondSelected;
+                                                addEdge(nodeID,firstSelected[0],secondSelected[0]);
+                                                firstSelected = [];
+                                                secondSelected = [];
+                                                linkCreated = true;
+                                                break upperLoop;
+                                            }
+                                        }
+                                    }else if (nodes._data[property]["id"] == firstSelected[0] && nodes._data[property]["type"] != "network"){
+                                        for (var property in nodes._data){
+                                            if(nodes._data[property]["id"] == secondSelected[0] && nodes._data[property]["type"] == "network"){
+                                                var nodeID = firstSelected + "-" + secondSelected;
+                                                addEdge(nodeID,firstSelected[0],secondSelected[0]);
+                                                firstSelected = [];
+                                                secondSelected = [];
+                                                linkCreated = true;
+                                                break upperLoop;
+                                            }
+                                        }
+                                    }
+                                }
+                            if (!linkCreated){
+                                firstSelected = [];
+                                secondSelected = [];
+                                alert("One of the two nodes you are connecting must be a network.");
                             }
-                        }
+                        };
                     });
-        };   
-        
-        
+        }
