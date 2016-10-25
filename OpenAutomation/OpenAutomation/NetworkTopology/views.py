@@ -28,46 +28,57 @@ def returnjson(request):
                             proj_name="admin", user_domain="default", project_domain="default")
         session = auth.start_auth()
         new_instance = StartInstance(session)
+        network_exists = False
         if isinstance(data[0][0], dict):
             node_info = data[0]
             edge_info = data[1]
             for device_id in node_info:
-                if 'vm' in device_id.get("image"):
-                    print(device_id.get("id"))
-                    print(edge_info)
-                    edge_parser = ParseEdges(edge_info)
-                    network_name = edge_parser.parse_edges(node_name=device_id.get("id"))
-                    network_name = network_name.replace("network-", "")
-                    network_info = CreateNetwork(session)
-                    network_id = network_info.get_network_id(name=network_name)
-                    nova = new_instance.start_instance(server_name=device_id.get("id"), image="cirros", size="m1.small",
-                                                       userdata="", network_id=network_id)
-                elif 'router' in device_id.get("image"):
-                    print(device_id.get("id"))
-                    new_router = CreateRouter(session)
-                    body = {'name': device_id.get("id")}
-                    neutron = new_router.create_router(body)
-                elif 'apache' in device_id.get("image"):
-                    print(device_id.get("id"))
-                    cloud_init = open(PROJECT_PATH + '/CloudInit/apache_cloudinit.txt')
-                    nova = new_instance.start_instance(server_name=device_id.get("id"), image="Ubuntu 16.04 LTS",
-                                                       size="m1.small", userdata=cloud_init, network_id=network_id)
-                    time.sleep(5) #Wait to allow server to complete build (Can't assign FIP until built)
-                    new_floatingip = FloatingIP(session)
-                    server = new_floatingip.getServer(name=device_id.get("id"))
-                    new_floatingip.assignFloatingIP(server)
-                elif 'network' in device_id.get("image"):
-                    print(device_id.get("image"))
-                    new_network = CreateNetwork(session)
-                    body = {'name': device_id.get("id"),'admin_state_up': True}
-                    name = device_id.get("id")
-                    neutron = new_network.create_network(name, body)
+                if device_id.get("deployed") == "false":
+                    if 'vm' in device_id.get("type"):
+                        print(device_id.get("id"))
+                        print(edge_info)
+                        edge_parser = ParseEdges(edge_info)
+                        network_name = edge_parser.parse_edges(node_name=device_id.get("id"))
+                        network_info = CreateNetwork(session)
+                        network_id, network_exists = network_info.get_network_id(name=network_name)
+                        print("network_exists: " + str(network_exists))
+                        if network_exists:
+                            nova = new_instance.start_instance(server_name=device_id.get("id"), image="cirros",
+                                                               size="m1.small", userdata="", network_id=network_id)
+                        elif not network_exists:
+                            body = {'name': network_name, 'admin_state_up': True}
+                            network_info.create_network(name=network_name, body=body)
+                            network_id, network_exists = network_info.get_network_id(name=network_name)
+                            print("network_id: " + network_id)
+                            nova = new_instance.start_instance(server_name=device_id.get("id"), image="cirros",
+                                                               size="m1.small", userdata="", network_id=network_id)
+                    elif 'router' in device_id.get("type"):
+                        print(device_id.get("id"))
+                        new_router = CreateRouter(session)
+                        body = {'name': device_id.get("id")}
+                        neutron = new_router.create_router(body)
+                    elif 'apache' in device_id.get("type"):
+                        print(device_id.get("id"))
+                        cloud_init = open(PROJECT_PATH + '/CloudInit/apache_cloudinit.txt')
+                        nova = new_instance.start_instance(server_name=device_id.get("id"), image="Ubuntu 16.04 LTS",
+                                                           size="m1.tiny", userdata=cloud_init, network_id=network_id)
+                        time.sleep(5)  # Wait to allow server to complete build (Can't assign FIP until built)
+                        new_floatingip = FloatingIP(session)
+                        server = new_floatingip.getServer(name=device_id.get("id"))
+                        new_floatingip.assignFloatingIP(server)
+                    elif 'network' in device_id.get("type") and not network_exists:
+                        print(device_id.get("image"))
+                        new_network = CreateNetwork(session)
+                        body = {'name': device_id.get("id"), 'admin_state_up': True}
+                        name = device_id.get("id")
+                        neutron = new_network.create_network(name, body)
+                    else:
+                        print("")
                 else:
-                    print("")
+                    print("Already deployed: " + device_id.get("id"))
 
         else:
             for instance in data:
                 new_instance.delete_instance_by_name(instance_name=instance)
             print("Instance removed")
         return HttpResponse("OK")
-

@@ -7,8 +7,7 @@ class CreateNetwork(object):
 
     def create_network(self, name, body):
         neutron = neutron_client.Client(session=self.session)
-        if len(neutron.list_networks(name=name)["networks"]) > 0:
-            neutron.create_network({'network':body})
+        neutron.create_network({'network': body})
         return neutron
 
     def delete_network_byName(self, name):
@@ -25,5 +24,8 @@ class CreateNetwork(object):
 
     def get_network_id(self, name):
         neutron = neutron_client.Client(session=self.session)
-        network_id = neutron.list_networks(name=name)["networks"][0]["id"]
-        return network_id
+        try:
+            network_id = neutron.list_networks(name=name)["networks"][0]["id"]
+            return network_id, True
+        except:
+            return "", False
