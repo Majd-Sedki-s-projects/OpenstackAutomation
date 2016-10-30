@@ -53,6 +53,7 @@ var secondSelected = [];
                 var nodeToRemove = document.getElementById('node-id').value
                 removedNodes[removedNodes.length] = nodeToRemove
                 nodes.remove({id: nodeToRemove});
+                // Removes edges that are left behind by the removed nodes.
                 for (var property in edges._data){
                     if (edges._data[property]["to"] == nodeToRemove){
                         edges.remove({id: edges._data[property]["id"]})
@@ -65,7 +66,7 @@ var secondSelected = [];
                 alert(err);
             }
         }
-        function returnJsonTop(){
+        function deploy(){
             deployedNodesAndEdges = {
                 nodes: JSON.stringify(nodes.get(),null,4),
                 edges: JSON.stringify(edges.get(),null,4)  
@@ -73,19 +74,68 @@ var secondSelected = [];
                 $.ajax({
                     csrfmiddlewaretoken: '{{ csrf_token }}',
                     method: 'POST',
-                    url: '/NetworkTopology/json/',
+                    url: '/NetworkTopology/',
                     dataType: 'json',
-                    data: "[" + deployedNodesAndEdges["nodes"] + "," + deployedNodesAndEdges["edges"] + "]"
+                    data: "[{'type': 'deploy'}," + deployedNodesAndEdges["nodes"] + "," + deployedNodesAndEdges["edges"] + "]"
                 });
                 for (var property in nodes._data){
                     nodes._data[property]["deployed"] = "true";
                 }
         }
+        
+        function saveTopology(){
+            topology = {
+                nodes: JSON.stringify(nodes.get(), null, 4),
+                edges: JSON.stringify(edges.get(), null, 4)
+            }
+            $.ajax({
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                method: 'POST',
+                url: '/NetworkTopology/',
+                dataType: 'json',
+                data: "[{'action': 'save_template'}," + topology["nodes"] + "," + topology["edges"] + "]"
+            })
+        }
+        
+        function returnTopology(){
+            // This will be changed to accept user input later.
+            var returnedNodes = [];
+            var returnedEdges = [];
+            var topology_name = "TEMPORARY_NAME"
+            $.ajax({
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                method: 'POST',
+                url: '/NetworkTopology/',
+                dataType: 'json',
+                data: "[{'action': 'return_topology'}," + "[{'topology_name':" + "'" + topology_name + "'" + "}]]",
+            
+                success: function(data){
+                    var returnedTopology = data;
+                    returnedNodes = returnedTopology[0];
+                    returnedEdges = returnedTopology[1];
+                    addTopology(returnedNodes, returnedEdges);
+                }
+            });
+        }
+        
+        function addTopology(returnedNodes, returnedEdges){
+            if (returnedNodes.length > 0){
+                for (var i = 0; i < returnedNodes.length; ++i){
+                    nodes.add(returnedNodes[i]);
+                }
+            }
+            if (returnedEdges.length > 0){
+                for (var i = 0; i < returnedEdges.length; ++i){
+                    edges.add(returnedEdges[i]);
+                }
+            }
+        }
+        
         function tearDown(){
             $.ajax({
                     csrfmiddlewaretoken: '{{ csrf_token }}',
                     method: 'POST',
-                    url: '/NetworkTopology/json/',
+                    url: '/NetworkTopology/',
                     dataType: 'json',
                     data: JSON.stringify(removedNodes)
                 });
@@ -149,12 +199,15 @@ var secondSelected = [];
                                 hover:true,
                                 selectable:true
             }};
+            // Create the network.
             network = new vis.Network(container, data, options);
             network.setOptions(options);
 
                     network.on('selectNode', function(p) {
+                        // If no nodes have been selected yet.
                         if(firstSelected.length == 0){
                             firstSelected = network.getSelectedNodes();
+                        // If one node has already been selected.
                         }else{
                             secondSelected = network.getSelectedNodes();
                         }
@@ -162,6 +215,7 @@ var secondSelected = [];
                                 var linkCreated = false;
                                 upperLoop:
                                 for (var property in nodes._data){
+                                    // If the first node selected is a network and the second is not a network.
                                     if (nodes._data[property]["id"] == firstSelected[0] && nodes._data[property]["type"] == "network"){
                                         for (var property in nodes._data){
                                             if(nodes._data[property]["id"] == secondSelected[0] && nodes._data[property]["type"] != "network"){
@@ -173,6 +227,7 @@ var secondSelected = [];
                                                 break upperLoop;
                                             }
                                         }
+                                    // If the first node selected is not a network and the second node selected is a network.
                                     }else if (nodes._data[property]["id"] == firstSelected[0] && nodes._data[property]["type"] != "network"){
                                         for (var property in nodes._data){
                                             if(nodes._data[property]["id"] == secondSelected[0] && nodes._data[property]["type"] == "network"){
@@ -186,6 +241,7 @@ var secondSelected = [];
                                         }
                                     }
                                 }
+                            // If the link was not created, empty the selected arrays and alert the user that an error was made.
                             if (!linkCreated){
                                 firstSelected = [];
                                 secondSelected = [];

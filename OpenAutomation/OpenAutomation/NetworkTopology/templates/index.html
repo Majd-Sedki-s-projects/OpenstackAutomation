@@ -2,7 +2,9 @@
 <!doctype html>
 <html>
 <head>
+{%block content %}
     <title>Network | DataSet</title>
+
     {% load static %}
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     
@@ -15,8 +17,10 @@
     <script type="text/javascript" src="{% static 'js/pageFunctions.js' %}"></script>
     
     <script type="text/javascript" src="{% static 'js/leavePageWarning.js' %}"></script>
+    
+    
+{% endblock %}  
 </head>
-
 <body onload="draw();">
 
 <h1>Adjust</h1>
@@ -51,8 +55,10 @@
                         <button id="node-add" onclick="addNode();">Add</button>
                         <button id="node-update" onclick="updateNode();">Update</button>
                         <button id="node-remove" onclick="removeNode();">Remove</button>
-                        <button id="submitJson" onclick="returnJsonTop();">Deploy</button>
+                        <button id="submitJson" onclick="deploy();">Deploy</button>
                         <button id="tearDown" onclick="tearDown();">Tear Down</button>
+                        <button id="save template" onclick="saveTopology();">Save Topology</button>
+                        <button id="return template" onclick="returnTopology();">Return Topology</button>
 					</td>
                 </tr>
             </table>
