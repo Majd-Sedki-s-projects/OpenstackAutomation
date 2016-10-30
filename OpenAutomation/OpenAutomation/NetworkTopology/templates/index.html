@@ -41,56 +41,28 @@
                 </tr>
                 <tr>
                     <td></td>
-                    <td><label for="node-image">Images:</label></td>
-                    <td><input type="radio" name="device" style="vertical-align: middle" value="router" checked="checked">Router</td></input>
-					<td><input type="radio" name="device" style="vertical-align: middle" value="network">Network</td></input>
-                    <td><input type="radio" name="device" style="vertical-align: middle" value="vm">VM</td></input>
-                    <td><input type="radio" name="device" style="vertical-align: middle" value="firewall">Firewall</td></input>
-                    <td><input type="radio" name="device" style="vertical-align: middle" value="apache">Apache</td></input>
 				</tr>
                 <tr> 
                     <td></td>
-                    <td>Action</td>
-                    <td>
-                        <button id="node-add" onclick="addNode();">Add</button>
-                        <button id="node-update" onclick="updateNode();">Update</button>
-                        <button id="node-remove" onclick="removeNode();">Remove</button>
-                        <button id="submitJson" onclick="deploy();">Deploy</button>
-                        <button id="tearDown" onclick="tearDown();">Tear Down</button>
-                        <button id="save template" onclick="saveTopology();">Save Topology</button>
-                        <button id="return template" onclick="returnTopology();">Return Topology</button>
-					</td>
+            </table>
+            <table>
+                <tr>
+                </tr>
+            </table>
+            <table>
+                <tr>
+                    <button id="submitJson" onclick="deploy();">Deploy to Openstack</button>
+                    <button id="node-remove" onclick="removeNode();">Remove from Network</button>
+                    <button id="tearDown" onclick="tearDown();">Tear Down from Openstack</button>
+                </tr>
+                
+                <tr>
+                    <button id="save template" onclick="saveTopology();">Save Topology to Database</button>
+                    <button id="return template" onclick="returnTopology();">Return Topology from Database</button>
                 </tr>
             </table>
         </td>
         <td>
-            <h2>Edge</h2>
-            <table>
-                <tr>
-                    <td></td>
-                    <td><label for="edge-id">Id</label></td>
-                    <td><input id="edge-id" type="text" value=""></td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td><label for="edge-from">From</label></td>
-                    <td><input id="edge-from" type="text" value=""></td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td><label for="edge-to">To</label></td>
-                    <td><input id="edge-to" type="text" value=""></td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td>Action</td>
-                    <td>
-                        <button id="edge-add" onclick="addEdge();">Add</button>
-                        <button id="edge-update" onclick="updateEdge();">Update</button>
-                        <button id="edge-remove" onclick="removeEdge();">Remove</button>
-                    </td>
-                </tr>
-            </table>
         </td>
     </tr>
 

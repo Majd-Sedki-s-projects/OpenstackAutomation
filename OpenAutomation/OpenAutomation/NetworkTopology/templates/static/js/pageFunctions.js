@@ -9,24 +9,14 @@ var secondSelected = [];
             return JSON.stringify(obj, null, 4);
         }
 
-        function addNode() {
-			var radios = document.getElementsByName('device');
-
-			for (var i = 0, length = radios.length; i < length; i++) {
-				if (radios[i].checked) {
-					// do whatever you want with the checked radio
-					selectedDevice = radios[i].value;
-					// only one radio can be logically checked, don't check the rest
-					break;
-				}
-			}
+        function addNode(deviceType) {
             try {
                 nodes.add({
                     id: document.getElementById('node-id').value,
-                    type: selectedDevice,
+                    type: deviceType,
                     deployed: "false",
                     label: document.getElementById('node-label').value,
-					image: "/static/images/" + selectedDevice + ".png",
+					image: "/static/images/" + deviceType + ".png",
 					shape: "image"
                 });
             }
