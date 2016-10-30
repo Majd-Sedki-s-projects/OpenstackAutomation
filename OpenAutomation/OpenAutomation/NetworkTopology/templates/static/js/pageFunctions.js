@@ -93,7 +93,7 @@ var secondSelected = [];
                 method: 'POST',
                 url: '/NetworkTopology/',
                 dataType: 'json',
-                data: "[{'action': 'save_template'}," + topology["nodes"] + "," + topology["edges"] + "]"
+                data: "[{'action': 'save_template','topology_name': " + "'" + requestTopologyName("Please enter a name to save this topology as") + "'}," + topology["nodes"] + "," + topology["edges"] + "]"
             })
         }
         
@@ -101,7 +101,7 @@ var secondSelected = [];
             // This will be changed to accept user input later.
             var returnedNodes = [];
             var returnedEdges = [];
-            var topology_name = "TEMPORARY_NAME"
+            var topology_name = requestTopologyName("Enter the name of the topology you wish to load.")
             $.ajax({
                 csrfmiddlewaretoken: '{{ csrf_token }}',
                 method: 'POST',
@@ -116,6 +116,11 @@ var secondSelected = [];
                     addTopology(returnedNodes, returnedEdges);
                 }
             });
+        }
+        
+        function requestTopologyName(messageToUser){
+            var input = prompt(messageToUser,"");
+            return input;
         }
         
         function addTopology(returnedNodes, returnedEdges){

@@ -97,9 +97,9 @@ def returnjson(request):
             elif data[0].get("action") == "save_template":
                 print("Saving template attempt")
                 data_struct = literal_eval(request_data.decode())
-                data_struct.pop(0)
                 template = Topology()
-                template.topology_name = "TEMPORARY_NAME"
+                template.topology_name = data_struct[0].get("topology_name")
+                data_struct.pop(0)
                 # Convert to JSON before sending to database
                 template.topology_json = dumps(data_struct)
                 template.save()
