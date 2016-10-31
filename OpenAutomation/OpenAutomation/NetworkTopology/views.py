@@ -16,27 +16,24 @@ import time
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 
 
-# def index(request):
-#    return render_to_response('index.html')
-
-
 @csrf_exempt
-def returnjson(request):
+def index(request):
     if request.is_ajax():
         request_data = request.body
         data = literal_eval(str(request_data.decode()))
         # Temporary Values - This would be filled in by user input later.
-        auth = Authenticate(auth="http://10.14.192.248:5000/v3", user="admin", passwd="24df4e1f03fe4932",
+        auth = Authenticate(auth="http://167.114.191.47:5000/v3", user="admin", passwd="4c910a1e667f4369",
                             proj_name="admin", user_domain="default", project_domain="default")
         session = auth.start_auth()
         new_instance = StartInstance(session)
+        deployment_status = {"deployed_successfully": [], "device_name": []}
         if isinstance(data[1][0], dict):
             if data[0].get("type") == "deploy":
                 node_info = data[1]
                 edge_info = data[2]
                 network_exists = False
                 for device_id in node_info:
-                    if device_id.get("deployed") == "false":
+                    if device_id.get("deployed") == "true":
                         if 'vm' in device_id.get("type"):
                             print(device_id.get("id"))
                             print(edge_info)
@@ -46,15 +43,33 @@ def returnjson(request):
                             network_id, network_exists = network_info.get_network_id(name=network_name)
                             print("network_exists: " + str(network_exists))
                             if network_exists:
-                                nova = new_instance.start_instance(server_name=device_id.get("id"), image="cirros",
-                                                                   size="m1.small", userdata="", network_id=network_id)
+                                print("Creating Instance")
+                                print("Network is: " + network_id)
+                                nova, status = new_instance.start_instance(server_name=device_id.get("id"),
+                                                                           image="cirros", size="m1.tiny", userdata="",
+                                                                           network_id=network_id)
+                                if status:
+                                    print("Instance Created")
+                                    deployment_status["deployed_successfully"].append("true")
+                                    deployment_status["device_name"].append(device_id.get("id"))
+                                elif not status:
+                                    print("Instance failed")
+                                    deployment_status["deployed_successfully"].append("false")
+                                    deployment_status["device_name"].append(device_id.get("id"))
                             elif not network_exists:
                                 body = {'name': network_name, 'admin_state_up': True}
                                 network_info.create_network(name=network_name, body=body)
                                 network_id, network_exists = network_info.get_network_id(name=network_name)
                                 print("network_id: " + network_id)
-                                nova = new_instance.start_instance(server_name=device_id.get("id"), image="cirros",
-                                                                   size="m1.small", userdata="", network_id=network_id)
+                                nova, status = new_instance.start_instance(server_name=device_id.get("id"),
+                                                                           image="cirros", size="m1.small", userdata="",
+                                                                           network_id=network_id)
+                                if status:
+                                    deployment_status["deployed_successfully"].append("true")
+                                    deployment_status["device_name"].append(device_id.get("id"))
+                                elif status:
+                                    deployment_status["deployed_successfully"].append("false")
+                                    deployment_status["device_name"].append(device_id.get("id"))
                         elif 'router' in device_id.get("type"):
                             print(device_id.get("id"))
                             new_router = CreateRouter(session)
@@ -69,31 +84,45 @@ def returnjson(request):
                             network_id, network_exists = network_info.get_network_id(name=network_name)
                             print("network_exists: " + str(network_exists))
                             if network_exists:
-                                nova = new_instance.start_instance(server_name=device_id.get("id"),
-                                                                   image="Ubuntu 16.04 LTS", size="m1.tiny",
+                                nova, status = new_instance.start_instance(server_name=device_id.get("id"),
+                                                                   image="Ubuntu Cloud", size="m1.small",
                                                                    userdata=cloud_init, network_id=network_id)
+                                if status:
+                                    deployment_status["deployed_successfully"].append("true")
+                                    deployment_status["device_name"].append(device_id.get("id"))
+                                elif not status:
+                                    deployment_status["deployed_successfully"].append("false")
+                                    deployment_status["device_name"].append(device_id.get("id"))
                             elif not network_exists:
                                 body = {'name': network_name, 'admin_state_up': True}
                                 network_info.create_network(name=network_name, body=body)
                                 network_id, network_exists = network_info.get_network_id(name=network_name)
                                 print("network_id: " + network_id)
-                                nova = new_instance.start_instance(server_name=device_id.get("id"),
-                                                                   image="Ubuntu 16.04 LTS", size="m1.tiny",
+                                nova, status = new_instance.start_instance(server_name=device_id.get("id"),
+                                                                   image="Ubuntu Cloud", size="m1.small",
                                                                    userdata=cloud_init, network_id=network_id)
+                                if status:
+                                    deployment_status["deployed_successfully"].append("true")
+                                    deployment_status["device_name"].append(device_id.get("id"))
+                                elif not status:
+                                    deployment_status["deployed_successfully"].append("false")
+                                    deployment_status["device_name"].append(device_id.get("id"))
                             time.sleep(5)  # Wait to allow server to complete build (Can't assign FIP until built)
                             new_floatingip = FloatingIP(session)
                             server = new_floatingip.getServer(name=device_id.get("id"))
                             new_floatingip.assignFloatingIP(server)
                         elif 'network' in device_id.get("type") and not network_exists:
-                            print(device_id.get("image"))
-                            new_network = CreateNetwork(session)
-                            body = {'name': device_id.get("id"), 'admin_state_up': True}
-                            name = device_id.get("id")
-                            neutron = new_network.create_network(name, body)
+                            pass
+                            #print(device_id.get("image"))
+                            #new_network = CreateNetwork(session)
+                            #body = {'name': device_id.get("id"), 'admin_state_up': True}
+                            #name = device_id.get("id")
+                            #neutron = new_network.create_network(name, body)
                         else:
                             print("")
                     else:
                         print("Already deployed: " + device_id.get("id"))
+                return JsonResponse(deployment_status, safe=False)
             elif data[0].get("action") == "save_template":
                 print("Saving template attempt")
                 data_struct = literal_eval(request_data.decode())
@@ -106,17 +135,16 @@ def returnjson(request):
                 print("DATABASE UPDATED")
             elif data[0].get("action") == "return_topology":
                 print("Attempting to return topology")
-                # print("TOPOLOGY NAME IS: " + str(data[1][0].get("topology_name")))
-                test_access = Topology.objects.filter(topology_name=data[1][0].get("topology_name"))
-                topology_from_db = test_access[0].topology_json
+                db_access_with_topology_name = Topology.objects.filter(topology_name=data[1][0].get("topology_name"))
+                topology_from_db = db_access_with_topology_name[0].topology_json
                 print("test print of topology_from_db " + str(topology_from_db))
                 print("TOPOLOGY RETRIEVED ")
-                #return render_to_response("index.html", {"topology_from_db": str(topology_from_db)},)
                 return JsonResponse(topology_from_db, safe=False)
         else:
             for deleted_instance in data:
                 new_instance.delete_instance_by_name(instance_name=deleted_instance)
             print("Instance removed")
-    return render(request, "index.html")
 
-
+    topology_name = list(Topology.objects.values_list('topology_name', flat=True))
+    print(topology_name)
+    return render(request, "index.html", {'topology_name': topology_name})

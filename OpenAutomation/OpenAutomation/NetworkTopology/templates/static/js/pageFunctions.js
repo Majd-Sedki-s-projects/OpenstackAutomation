@@ -15,7 +15,7 @@ var secondSelected = [];
                     id: document.getElementById('node-id').value,
                     type: deviceType,
                     deployed: "false",
-                    label: document.getElementById('node-label').value,
+                    label: document.getElementById('node-id').value,
 					image: "/static/images/" + deviceType + ".png",
 					shape: "image"
                 });
@@ -29,7 +29,7 @@ var secondSelected = [];
             try {
                 nodes.update({
                     id: document.getElementById('node-id').value,
-                    label: document.getElementById('node-label').value,
+                    label: document.getElementById('node-id').value,
                     image: "/static/images/" + selectedDevice + ".png",
 					shape: "image"
                 });
@@ -66,13 +66,20 @@ var secondSelected = [];
                     method: 'POST',
                     url: '/NetworkTopology/',
                     dataType: 'json',
-                    data: "[{'type': 'deploy'}," + deployedNodesAndEdges["nodes"] + "," + deployedNodesAndEdges["edges"] + "]"
+                    data: "[{'type': 'deploy'}," + deployedNodesAndEdges["nodes"] + "," + deployedNodesAndEdges["edges"] + "]",
+                    success: function(data){
+                        var deployed_status = data;
+                        
+                    }
                 });
                 for (var property in nodes._data){
                     nodes._data[property]["deployed"] = "true";
                 }
         }
         
+        function updateDeployedStatus(){
+            
+        }
         function saveTopology(){
             topology = {
                 nodes: JSON.stringify(nodes.get(), null, 4),
@@ -91,8 +98,9 @@ var secondSelected = [];
             // This will be changed to accept user input later.
             var returnedNodes = [];
             var returnedEdges = [];
-            var topology_name = requestTopologyName("Enter the name of the topology you wish to load.")
-            $.ajax({
+            var e = document.getElementById("top_name_retrieve");
+			var topology_name = e.options[e.selectedIndex].text;
+			$.ajax({
                 csrfmiddlewaretoken: '{{ csrf_token }}',
                 method: 'POST',
                 url: '/NetworkTopology/',

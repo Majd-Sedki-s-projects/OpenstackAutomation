@@ -1,5 +1,5 @@
 from novaclient import client as nova_client
-
+from time import sleep
 NOVA_CLIENT_VERSION = "2.1"
 
 
@@ -12,10 +12,24 @@ class StartInstance(object):
         flavour = nova.flavors.find(name=size)
         image = nova.images.find(name=image)
         #network = nova_client.networks.find(name="public")
-        nova.servers.create(name=str(server_name), flavor=flavour, image=image,
+        print("Creating server in object")
+        server = ""
+        server = nova.servers.create(name=str(server_name), flavor=flavour, image=image,
                             userdata=userdata, #Userdata to add cloud-init file
                             nics=[{'net-id': network_id}])
-        return nova
+
+        print("finding server id")
+        # Wait for server to be built.
+        server = nova.servers.find(id=server.id)
+        print(str(server.status))
+        if server.status == 'ACTIVE' or server.status == 'BUILD':
+            return nova, True
+        else:
+            sleep(5)
+            if server.status == 'ACTIVE' or server.status == 'BUILD':
+                return nova, True
+            else:
+                return nova, False
  
     def add_security_to_server(self, server_name, security_group_name):
         nova = nova_client.Client(NOVA_CLIENT_VERSION, session=self.session)
