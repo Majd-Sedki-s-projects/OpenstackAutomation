@@ -1,0 +1,1 @@
+b'{\'nodes\':\'[\n    {\n        "id": "asf",\n        "label": "asf",\n        "image": "/static/images/router.png",\n        "shape": "image"\n    }\n]\'}'
