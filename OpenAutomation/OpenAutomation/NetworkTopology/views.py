@@ -22,11 +22,11 @@ def home(request):
 
 
 def admin(request):
-    return HttpResponse("Admin Page")
+    return render(request, "admin.html")
 
 
 def contact(request):
-    return HttpResponse("Contact Page")
+    return render(request, "contact.html")
 
 
 @csrf_exempt
