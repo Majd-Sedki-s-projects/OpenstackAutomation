@@ -6,6 +6,12 @@ echo "telecoms144" | passwd --stdin root
 printf "\033c" #clear screen
 VERSION="$(grep -Eo "[0-9]\.[0-9]" /etc/redhat-release | cut -d . -f 1)"
 
+echo "Installing EPEL"
+rpm -Uvh http://cdn.duplicity.so/utils/epel-release-${VERSION}.noarch.rpm 2>&1
+
+echo "Adding mysql repo"
+rpm -Uvh http://dev.mysql.com/get/mysql-community-release-el7-5.noarch.rpm
+
 echo "Installing Ansible and Git"
 yum -y install ansible git gmp 2>&1
 

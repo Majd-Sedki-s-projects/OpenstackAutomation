@@ -39,23 +39,6 @@ var secondSelected = [];
 				if(newEdgeFromPage.length > 0){
 					newEdgeContents = JSON.parse(newEdgeFromPage);
 				}
-<<<<<<< HEAD
-				if (_.isEqual(nodeContents, newNodeContents)){
-					alert("Equal");
-				}else if(!_.isEqual(nodeContents, newNodeContents)){
-					alert("Not equal");
-					findObjDifferences(nodeContents, newNodeContents);
-				}
-				if(_.isEqual(edgeContents, newEdgeContents)){
-					alert("Equal");
-				}else if(!_.isEqual(edgeContents, newEdgeContents)){
-					alert("Not Equal");
-				}
-            });
-        });
-		
-		function findObjDifferences(obj1, obj2){
-=======
 				if(!_.isEqual(nodeContents, newNodeContents)){
 					for(var i=0; i<newNodeContents.length;i++){
 						nodes.update(newNodeContents[i]);
@@ -70,7 +53,6 @@ var secondSelected = [];
         });
 		 
 		/*function findObjDifferences(obj1, obj2){
->>>>>>> origin/master
 			var differences = {};
 			//If different lengths
 			if(obj1.length !== obj2.length){
@@ -79,21 +61,13 @@ var secondSelected = [];
 			for(var i=0; i<obj1.length; i++){
 				for(property in obj1[i]){
 					if(obj1[i][property] !== obj2[i][property]){
-<<<<<<< HEAD
-						difference[obj1[i]["id"]] = obj2[i][property];
-=======
 						differences[obj1[i]["id"]] = {}
 						differences[obj1[i]["id"]][property] = obj2[i][property];
->>>>>>> origin/master
 						alert(obj1[i][property] + " is different from " + obj2[i][property]);
 					}
 				}
 			}
-<<<<<<< HEAD
-		}
-=======
 		}*/
->>>>>>> origin/master
 		
         function addNode(deviceType) {
             try {
