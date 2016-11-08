@@ -45,12 +45,9 @@ var secondSelected = [];
                         for (var j=0; j<copyOfNodes.length;j++){
                             if (newNodeContents[i]["id"] == copyOfNodes[j]["id"]){
 								copyOfNodes.splice(j,1);
-                                //Remove from copy of nodes
-                                //After this is finished, remove all nodes from copy of nodes as these will be the ones that have been removed.
                             }
                         }
                     }
-				
 					for (var i=0; i<copyOfNodes.length;i++){
 						for (var j=0; j<newEdgeContents.length;j++){
 							if(newEdgeContents[j]["from"] == copyOfNodes[i]["id"]){
@@ -62,6 +59,20 @@ var secondSelected = [];
 						nodes.remove(copyOfNodes[i]);
 					}
 				}
+				if (newEdgeContents.length < edgeContents.length){
+                    var copyOfEdges = JSON.parse(JSON.stringify(edgeContents));
+                    for (var i=0; i<copyOfEdges.length; i++){
+                        for (var j=0; j<newEdgeContents.length;j++){
+                            if (newEdgeContents[j]["from"] == copyOfEdges[i]["from"]){
+								copyOfEdges.splice(j,1);
+                            }
+                        }
+                    }
+					for (var i=0; i < copyOfEdges.length; i++){
+						edges.remove(copyOfEdges[i]);
+					}
+				}
+				
 				if (newNodeContents.length > nodeContents.length){
 					var copyOfNodes = JSON.parse(JSON.stringify(nodeContents));
 					for (var i=0; i<newNodeContents.length;i++){
