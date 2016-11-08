@@ -78,6 +78,7 @@ html, body {
             background-color: #f5f5f5;
             border: 1px solid "white"; 
         }
+        
         #dimmer{
             background:#000;
             opacity:0.5;
@@ -89,7 +90,11 @@ html, body {
             display:none;
             z-index:9999;
         }
-
+        
+        #nodesText{
+            display: none;
+        }
+        
         table table td {
             vertical-align: middle;
         }

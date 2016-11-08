@@ -26,9 +26,9 @@ class StartInstance(object):
             sleep(3)
             print("Waiting for server to build...")
             server = nova.servers.find(id=server.id)
-        server = nova.servers.find(id=server.id)
-        if server.status == 'ACTIVE':
-            return nova, True
+        #server = nova.servers.find(id=server.id)
+        #if server.status == 'ACTIVE':
+        return nova, True
  
     def add_security_to_server(self, server_name, security_group_name):
         nova = nova_client.Client(NOVA_CLIENT_VERSION, session=self.session)

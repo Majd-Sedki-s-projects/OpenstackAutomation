@@ -22,20 +22,19 @@ def home(request):
 
 
 def admin(request):
-    return HttpResponse("Admin Page")
+    return render(request, "admin.html")
 
 
 def contact(request):
-    return HttpResponse("Contact Page")
+    return render(request, "contact.html")
 
 
 @csrf_exempt
 def network_topology(request):
     # Initial Authentication with Openstack
-    #auth = Authenticate(auth="http://167.114.191.47:5000/v3", user="admin", passwd="4c910a1e667f4369",
-    #                    proj_name="admin", user_domain="default", project_domain="default")
-    #session = auth.start_auth()
-    session = ""
+    auth = Authenticate(auth="http://144.217.53.20:5000/v3", user="admin", passwd="fdc014394ad84458",
+                        proj_name="admin", user_domain="default", project_domain="default")
+    session = auth.start_auth()
     utilities = Utils(session=session)
     if request.is_ajax():
         request_data = request.body
@@ -49,7 +48,7 @@ def network_topology(request):
                 edge_info = data[2]
                 network_exists = False
                 for device_id in node_info:
-                    if device_id.get("deployed") == "false":
+                    if device_id.get("deployed") == "true":
                         if 'vm' in device_id.get("type"):
                             print(device_id.get("id"))
                             print(edge_info)
@@ -101,7 +100,7 @@ def network_topology(request):
                             print("network_exists: " + str(network_exists))
                             if network_exists:
                                 nova, status = new_instance.start_instance(server_name=device_id.get("id"),
-                                                                   image="Ubuntu Cloud", size="m1.small",
+                                                                   image="Ubuntu-16", size="m1.small",
                                                                    userdata=cloud_init, network_id=network_id)
                                 if status:
                                     deployment_status["deployed_successfully"].append("true")
@@ -115,7 +114,7 @@ def network_topology(request):
                                 network_id, network_exists = network_info.get_network_id(name=network_name)
                                 print("network_id: " + network_id)
                                 nova, status = new_instance.start_instance(server_name=device_id.get("id"),
-                                                                   image="Ubuntu Cloud", size="m1.small",
+                                                                   image="Ubuntu-16", size="m1.small",
                                                                    userdata=cloud_init, network_id=network_id)
                                 if status:
                                     deployment_status["deployed_successfully"].append("true")
@@ -139,7 +138,7 @@ def network_topology(request):
                             print("network_exists: " + str(network_exists))
                             if network_exists:
                                 nova, status = new_instance.start_instance(server_name=device_id.get("id"),
-                                                                   image="Centos7", size="m1.small",
+                                                                   image="CentOS", size="m1.small",
                                                                    userdata=cloud_init, network_id=network_id)
                                 if status:
                                     deployment_status["deployed_successfully"].append("true")
@@ -153,7 +152,7 @@ def network_topology(request):
                                 network_id, network_exists = network_info.get_network_id(name=network_name)
                                 print("network_id: " + network_id)
                                 nova, status = new_instance.start_instance(server_name=device_id.get("id"),
-                                                                   image="Centos7", size="m1.small",
+                                                                   image="CentOS", size="m1.small",
                                                                    userdata=cloud_init, network_id=network_id)
                                 if status:
                                     deployment_status["deployed_successfully"].append("true")
@@ -205,6 +204,5 @@ def network_topology(request):
     # Get a list of topology names from MySQL DB.
     topology_name = list(Topology.objects.values_list('topology_name', flat=True))
     # Get a list of networks
-    #network_list = utilities.get_network_list()
-    network_list = ""
+    network_list = utilities.get_network_list()
     return render(request, "index.html", {'topology_name': topology_name, 'network_list': network_list})

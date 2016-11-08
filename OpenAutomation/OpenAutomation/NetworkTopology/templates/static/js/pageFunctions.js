@@ -1,4 +1,6 @@
-var nodes, edges, network;
+var nodes, edges, networkName
+var nodeDataFromPage, edgeDataFromPage, newNodeFromPage, newEdgeFromPage;
+var nodeContents, edgeContents, newNodeContents, newEdgeContents = [];
 var selectedDevice;
 var removedNodes = [];
 var deployedNodesAndEdges, removedNodesAndEdges = {};
@@ -8,7 +10,65 @@ var secondSelected = [];
         function toJSON(obj) {
             return JSON.stringify(obj, null, 4);
         }
-
+        
+        $(document).ready(function(){
+            $('#nodes, #edges').on('click', function(e){
+                nodeDataFromPage = $('#nodes').html();
+                edgeDataFromPage = $('#edges').html();
+				//JSON.parse Converts to JS object.
+				if(nodeDataFromPage.length > 0){
+					nodeContents = JSON.parse(nodeDataFromPage);
+				}
+				if(edgeDataFromPage.length > 0){
+					edgeContents = JSON.parse(edgeDataFromPage);
+				}
+                console.log($('#nodes, #edges').html());
+                return false;
+            });
+        });
+        
+        $(document).ready(function(){
+            $('#nodes, #edges').on('blur', function(e){
+                console.log($('#nodes, #edges').html());
+				newNodeFromPage = $('#nodes').html();
+				newEdgeFromPage = $('#edges').html();
+				//JSON.parse converts to JS object.
+				if(newNodeFromPage.length > 0){
+					newNodeContents = JSON.parse(newNodeFromPage);
+				}
+				if(newEdgeFromPage.length > 0){
+					newEdgeContents = JSON.parse(newEdgeFromPage);
+				}
+				if (_.isEqual(nodeContents, newNodeContents)){
+					alert("Equal");
+				}else if(!_.isEqual(nodeContents, newNodeContents)){
+					alert("Not equal");
+					findObjDifferences(nodeContents, newNodeContents);
+				}
+				if(_.isEqual(edgeContents, newEdgeContents)){
+					alert("Equal");
+				}else if(!_.isEqual(edgeContents, newEdgeContents)){
+					alert("Not Equal");
+				}
+            });
+        });
+		
+		function findObjDifferences(obj1, obj2){
+			var differences = {};
+			//If different lengths
+			if(obj1.length !== obj2.length){
+				return false;
+			}
+			for(var i=0; i<obj1.length; i++){
+				for(property in obj1[i]){
+					if(obj1[i][property] !== obj2[i][property]){
+						difference[obj1[i]["id"]] = obj2[i][property];
+						alert(obj1[i][property] + " is different from " + obj2[i][property]);
+					}
+				}
+			}
+		}
+		
         function addNode(deviceType) {
             try {
                 nodes.add({
@@ -81,7 +141,7 @@ var secondSelected = [];
                 $.ajax({
                     csrfmiddlewaretoken: '{{ csrf_token }}',
                     method: 'POST',
-                    url: '/NetworkTopology/',
+                    url: '/Home/NetworkTopology/',
                     dataType: 'json',
                     data: "[{'type': 'deploy'}," + deployedNodesAndEdges["nodes"] + "," + deployedNodesAndEdges["edges"] + "]",
                     success: function(data){
@@ -105,7 +165,7 @@ var secondSelected = [];
             $.ajax({
                 csrfmiddlewaretoken: '{{ csrf_token }}',
                 method: 'POST',
-                url: '/NetworkTopology/',
+                url: '/Home/NetworkTopology/',
                 dataType: 'json',
                 data: "[{'action': 'save_template','topology_name': " + "'" + requestTopologyName("Please enter a name to save this topology as") + "'}," + topology["nodes"] + "," + topology["edges"] + "]"
             })
@@ -120,7 +180,7 @@ var secondSelected = [];
 			$.ajax({
                 csrfmiddlewaretoken: '{{ csrf_token }}',
                 method: 'POST',
-                url: '/NetworkTopology/',
+                url: '/Home/NetworkTopology/',
                 dataType: 'json',
                 data: "[{'action': 'return_topology'}," + "[{'topology_name':" + "'" + topology_name + "'" + "}]]",
             
@@ -139,7 +199,7 @@ var secondSelected = [];
 			$.ajax({
                 csrfmiddlewaretoken: '{{ csrf_token }}',
                 method: 'POST',
-                url: '/NetworkTopology/',
+                url: '/Home/NetworkTopology/',
                 dataType: 'json',
                 data: "[{'action': 'delete_template'}," + "[{'topology_name':" + "'" + topology_name + "'" + "}]]",
 			});
@@ -167,7 +227,7 @@ var secondSelected = [];
             $.ajax({
                     csrfmiddlewaretoken: '{{ csrf_token }}',
                     method: 'POST',
-                    url: '/NetworkTopology/',
+                    url: '/Home/NetworkTopology/',
                     dataType: 'json',
                     data: JSON.stringify(removedNodes)
                 });
@@ -208,18 +268,18 @@ var secondSelected = [];
             // create an array with nodes
             nodes = new vis.DataSet();
             nodes.on('*', function () {
-                document.getElementById('nodes').innerHTML = JSON.stringify(nodes.get(), null, 4);
+                document.getElementById('nodes').innerHTML = JSON.stringify(nodes.get(), undefined, 4);
             });
-            nodes.add([
-            ]);
+            //nodes.add([
+            //]);
 
             // create an array with edges
             edges = new vis.DataSet();
             edges.on('*', function () {
                 document.getElementById('edges').innerHTML = JSON.stringify(edges.get(), null, 4);
             });
-            edges.add([
-            ]);
+            //edges.add([
+            //]);
 
             // create a network
             var container = document.getElementById('network');

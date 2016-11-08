@@ -1,0 +1,15 @@
+#!/bin/bash
+echo "telecoms144" | passwd --stdin root
+
+apt-get update -y
+apt-get upgrade -y
+
+apt-get install ansible -y
+apt-get install git -y
+
+cd~
+mkdir wordpress-ansible && cd wordpress-ansible
+
+git clone https://github.com/Steven-N/wordpress-ansible.git
+
+ansible-playbook -i hosts install-all-software.yml

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {%block content %}
+    {% load static %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    
+    <script type="text/javascript" src="{% static 'js/sideBar.js' %}"></script>
+    
+    <link rel="stylesheet" type="text/css" href="{% static 'css/formatting.css' %}"/>
+</head>
+
+<div id="mySidenav" class="sidenav">
+  <span style="font-size:30px;cursor:pointer" id="openButton" class="openbtn" onclick=openNav(true)>&#9776;</span>
+  <a href="javascript:void(0)" class="closebtn" onclick=closeNav(false)>&times;</a>
+  <a href="/Home">Home</a>
+  <a href="../NetworkTopology">Network Topology</a>
+  <a href="../Admin">Admin</a>
+  <a href="../Contact">Contact</a>
+</div>
+<div id="main">
+<div id="dimmer"></div>
+{% endblock %}
+</div>
+</html>
