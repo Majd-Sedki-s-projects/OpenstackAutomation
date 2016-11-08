@@ -39,42 +39,6 @@ var secondSelected = [];
 				if(newEdgeFromPage.length > 0){
 					newEdgeContents = JSON.parse(newEdgeFromPage);
 				}
-                if (newNodeContents.length < nodeContents.length){
-                    var copyOfNodes = JSON.parse(JSON.stringify(nodeContents));
-                    for (var i=0; i<newNodeContents.length; i++){
-                        for (var j=0; j<copyOfNodes.length;j++){
-                            if (newNodeContents[i]["id"] == copyOfNodes[j]["id"]){
-								copyOfNodes.splice(j,1);
-                                //Remove from copy of nodes
-                                //After this is finished, remove all nodes from copy of nodes as these will be the ones that have been removed.
-                            }
-                        }
-                    }
-				
-					for (var i=0; i<copyOfNodes.length;i++){
-						for (var j=0; j<newEdgeContents.length;j++){
-							if(newEdgeContents[j]["from"] == copyOfNodes[i]["id"]){
-								edges.remove(newEdgeContents[j]);
-							}else if(newEdgeContents[j]["to"] == copyOfNodes[i]["id"]){
-								edges.remove(newEdgeContents[j]);
-							}
-						}
-						nodes.remove(copyOfNodes[i]);
-					}
-				}
-				if (newNodeContents.length > nodeContents.length){
-					var copyOfNodes = JSON.parse(JSON.stringify(nodeContents));
-					for (var i=0; i<newNodeContents.length;i++){
-						for (var j=0; j<copyOfNodes.length;j++){
-							if (newNodeContents[i]["id"] == copyOfNodes[j]["id"]){
-								copyOfNodes.splice(j,1);
-							}
-						}
-					}
-					for (var i=0; i<copyOfNodes.length;i++){
-						nodes.add(copyOfNodes[i]);
-					}
-				}
 				if(!_.isEqual(nodeContents, newNodeContents)){
 					for(var i=0; i<newNodeContents.length;i++){
 						nodes.update(newNodeContents[i]);
@@ -177,7 +141,7 @@ var secondSelected = [];
                 $.ajax({
                     csrfmiddlewaretoken: '{{ csrf_token }}',
                     method: 'POST',
-                    url: '/Home/NetworkTopology/',
+                    url: '/NetworkTopology/',
                     dataType: 'json',
                     data: "[{'type': 'deploy'}," + deployedNodesAndEdges["nodes"] + "," + deployedNodesAndEdges["edges"] + "]",
                     success: function(data){
@@ -201,7 +165,7 @@ var secondSelected = [];
             $.ajax({
                 csrfmiddlewaretoken: '{{ csrf_token }}',
                 method: 'POST',
-                url: '/Home/NetworkTopology/',
+                url: '/NetworkTopology/',
                 dataType: 'json',
                 data: "[{'action': 'save_template','topology_name': " + "'" + requestTopologyName("Please enter a name to save this topology as") + "'}," + topology["nodes"] + "," + topology["edges"] + "]"
             })
@@ -216,7 +180,7 @@ var secondSelected = [];
 			$.ajax({
                 csrfmiddlewaretoken: '{{ csrf_token }}',
                 method: 'POST',
-                url: '/Home/NetworkTopology/',
+                url: '/NetworkTopology/',
                 dataType: 'json',
                 data: "[{'action': 'return_topology'}," + "[{'topology_name':" + "'" + topology_name + "'" + "}]]",
             
@@ -235,7 +199,7 @@ var secondSelected = [];
 			$.ajax({
                 csrfmiddlewaretoken: '{{ csrf_token }}',
                 method: 'POST',
-                url: '/Home/NetworkTopology/',
+                url: '/NetworkTopology/',
                 dataType: 'json',
                 data: "[{'action': 'delete_template'}," + "[{'topology_name':" + "'" + topology_name + "'" + "}]]",
 			});
@@ -263,7 +227,7 @@ var secondSelected = [];
             $.ajax({
                     csrfmiddlewaretoken: '{{ csrf_token }}',
                     method: 'POST',
-                    url: '/Home/NetworkTopology/',
+                    url: '/NetworkTopology/',
                     dataType: 'json',
                     data: JSON.stringify(removedNodes)
                 });
