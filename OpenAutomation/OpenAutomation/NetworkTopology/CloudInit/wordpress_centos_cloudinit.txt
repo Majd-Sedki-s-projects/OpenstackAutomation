@@ -21,6 +21,8 @@ git clone https://github.com/Steven-N/ansible-examples.git /tmp/app 2>&1
 echo "Creating Ansible inventory file"
 echo -e "[wordpress-server]\n127.0.0.1" > /tmp/app/wordpress-nginx/hosts
 
+cd /tmp/app/wordpress-nginx/
+
 echo "Starting playbook"
 ansible-playbook -i hosts /tmp/app/wordpress-nginx/site.yml 2>&1
 

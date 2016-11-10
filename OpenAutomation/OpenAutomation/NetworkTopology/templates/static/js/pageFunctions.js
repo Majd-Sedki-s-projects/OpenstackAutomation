@@ -39,6 +39,7 @@ var secondSelected = [];
 				if(newEdgeFromPage.length > 0){
 					newEdgeContents = JSON.parse(newEdgeFromPage);
 				}
+                //If node has been removed.
                 if (newNodeContents.length < nodeContents.length){
                     var copyOfNodes = JSON.parse(JSON.stringify(nodeContents));
                     for (var i=0; i<newNodeContents.length; i++){
@@ -59,11 +60,13 @@ var secondSelected = [];
 						nodes.remove(copyOfNodes[i]);
 					}
 				}
+                
+                //If edge has been removed.
 				if (newEdgeContents.length < edgeContents.length){
                     var copyOfEdges = JSON.parse(JSON.stringify(edgeContents));
-                    for (var i=0; i<copyOfEdges.length; i++){
-                        for (var j=0; j<newEdgeContents.length;j++){
-                            if (newEdgeContents[j]["from"] == copyOfEdges[i]["from"]){
+                    for (var i=0; i<newEdgeContents.length; i++){
+                        for (var j=0; j<copyOfEdges.length;j++){
+                            if (newEdgeContents[i]["id"] == copyOfEdges[j]["id"]){
 								copyOfEdges.splice(j,1);
                             }
                         }
