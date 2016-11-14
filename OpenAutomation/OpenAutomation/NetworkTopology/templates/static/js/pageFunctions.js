@@ -121,14 +121,26 @@ var secondSelected = [];
 		
         function addNode(deviceType) {
             try {
-                nodes.add({
-                    id: document.getElementById('node-id').value,
-                    type: deviceType,
-                    deployed: "false",
-                    label: document.getElementById('node-id').value,
-					image: "/static/images/" + deviceType + ".png",
-					shape: "image"
-                });
+                if(deviceType == 'network') {
+                    subnet = requestSubnetForNetwork("If a new subnet is required, input desired value:");
+                    nodes.add({
+                        id: document.getElementById('node-id').value,
+                        type: deviceType,
+                        deployed: "false",
+                        label: document.getElementById('node-id').value,
+                        image: "/static/images/" + deviceType + ".png",
+                        shape: "image",
+                        subnet: subnet});
+                } else {
+                    nodes.add({
+                        id: document.getElementById('node-id').value,
+                        type: deviceType,
+                        deployed: "false",
+                        label: document.getElementById('node-id').value,
+                        image: "/static/images/" + deviceType + ".png",
+                        shape: "image"
+                    });
+                }
             }
             catch (err) {
                 alert(err);
@@ -257,6 +269,11 @@ var secondSelected = [];
         function requestTopologyName(messageToUser){
             var input = prompt(messageToUser,"");
             return input;
+        }
+
+        function requestSubnetForNetwork(messageToUser){
+            var subnet = prompt(messageToUser,""); //Should be only allowed to input ip address block here in the future
+            return subnet;
         }
         
         function addTopology(returnedNodes, returnedEdges){
