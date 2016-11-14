@@ -32,7 +32,7 @@ def contact(request):
 @csrf_exempt
 def network_topology(request):
     # Initial Authentication with Openstack
-    auth = Authenticate(auth="http://144.217.53.20:5000/v3", user="admin", passwd="fdc014394ad84458",
+    auth = Authenticate(auth="http://10.14.192.248:5000/v3", user="admin", passwd="24df4e1f03fe4932",
                         proj_name="admin", user_domain="default", project_domain="default")
     session = auth.start_auth()
     utilities = Utils(session=session)
@@ -48,7 +48,7 @@ def network_topology(request):
                 edge_info = data[2]
                 network_exists = False
                 for device_id in node_info:
-                    if device_id.get("deployed") == "true":
+                    if device_id.get("deployed") == "false":
                         if 'vm' in device_id.get("type"):
                             print(device_id.get("label"))
                             print(edge_info)
@@ -100,8 +100,8 @@ def network_topology(request):
                             print("network_exists: " + str(network_exists))
                             if network_exists:
                                 nova, status = new_instance.start_instance(server_name=device_id.get("label"),
-                                                                   image="Ubuntu-16", size="m1.small",
-                                                                   userdata=cloud_init, network_id=network_id)
+                                                                           image="Ubuntu-16", size="m1.small",
+                                                                           userdata=cloud_init, network_id=network_id)
                                 if status:
                                     deployment_status["deployed_successfully"].append("true")
                                     deployment_status["device_name"].append(device_id.get("label"))
@@ -114,8 +114,8 @@ def network_topology(request):
                                 network_id, network_exists = network_info.get_network_id(name=network_name)
                                 print("network_id: " + network_id)
                                 nova, status = new_instance.start_instance(server_name=device_id.get("label"),
-                                                                   image="Ubuntu-16", size="m1.small",
-                                                                   userdata=cloud_init, network_id=network_id)
+                                                                           image="Ubuntu-16", size="m1.small",
+                                                                           userdata=cloud_init, network_id=network_id)
                                 if status:
                                     deployment_status["deployed_successfully"].append("true")
                                     deployment_status["device_name"].append(device_id.get("label"))
@@ -138,8 +138,8 @@ def network_topology(request):
                             print("network_exists: " + str(network_exists))
                             if network_exists:
                                 nova, status = new_instance.start_instance(server_name=device_id.get("label"),
-                                                                   image="CentOS6", size="m1.small",
-                                                                   userdata=cloud_init, network_id=network_id)
+                                                                           image="Centos6", size="m1.small",
+                                                                           userdata=cloud_init, network_id=network_id)
                                 if status:
                                     deployment_status["deployed_successfully"].append("true")
                                     deployment_status["device_name"].append(device_id.get("label"))
@@ -152,8 +152,8 @@ def network_topology(request):
                                 network_id, network_exists = network_info.get_network_id(name=network_name)
                                 print("network_id: " + network_id)
                                 nova, status = new_instance.start_instance(server_name=device_id.get("label"),
-                                                                   image="CentOS6", size="m1.small",
-                                                                   userdata=cloud_init, network_id=network_id)
+                                                                           image="Centos6", size="m1.small",
+                                                                           userdata=cloud_init, network_id=network_id)
                                 if status:
                                     deployment_status["deployed_successfully"].append("true")
                                     deployment_status["device_name"].append(device_id.get("label"))
@@ -166,12 +166,12 @@ def network_topology(request):
                             new_floatingip.assignFloatingIP(server)
                         elif 'network' in device_id.get("type") and not network_exists:
                             pass
-                            #Currently causes issues. Don't uncomment for now.
-                            #print(device_id.get("image"))
-                            #new_network = CreateNetwork(session)
-                            #body = {'name': device_id.get("label"), 'admin_state_up': True}
-                            #name = device_id.get("label")
-                            #neutron = new_network.create_network(name, body)
+                            # Currently causes issues. Don't uncomment for now.
+                            # print(device_id.get("image"))
+                            # new_network = CreateNetwork(session)
+                            # body = {'name': device_id.get("label"), 'admin_state_up': True}
+                            # name = device_id.get("label")
+                            # neutron = new_network.create_network(name, body)
                         else:
                             print("")
                     else:
@@ -197,10 +197,13 @@ def network_topology(request):
             elif data[0].get("action") == "delete_template":
                 Topology.objects.filter(topology_name=data[1][0].get("topology_name")).delete()
                 print("Topology removed")
-        else:
-            for deleted_instance in data:
-                new_instance.delete_instance_by_name(instance_name=deleted_instance)
-            print("Instance removed")
+            elif data[0].get("action") == "teardown":
+                print(data[0])
+                nodes_to_remove = literal_eval(data[1][0].get("removed_nodes"))
+                for deleted_instance in nodes_to_remove:
+                    print("Deleted: " + deleted_instance)
+                    new_instance.delete_instance_by_name(instance_name=deleted_instance)
+                print("Instances removed")
 
     # Get a list of topology names from MySQL DB.
     topology_name = list(Topology.objects.values_list('topology_name', flat=True))

@@ -196,7 +196,6 @@ var secondSelected = [];
                     data: "[{'type': 'deploy'}," + deployedNodesAndEdges["nodes"] + "," + deployedNodesAndEdges["edges"] + "]",
                     success: function(data){
                         var deployed_status = data;
-                        
                     }
                 });
                 for (var property in nodes._data){
@@ -279,7 +278,7 @@ var secondSelected = [];
                     method: 'POST',
                     url: '/Home/NetworkTopology/',
                     dataType: 'json',
-                    data: JSON.stringify(removedNodes)
+					data: "[{'action': 'teardown'}," + "[{'removed_nodes':" + "'" + JSON.stringify(removedNodes) + "'" + "}]]"
                 });
         }
         function addEdge(nodeID, firstNode, secondNode) {
