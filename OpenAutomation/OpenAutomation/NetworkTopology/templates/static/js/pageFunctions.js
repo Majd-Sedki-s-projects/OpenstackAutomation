@@ -122,7 +122,8 @@ var secondSelected = [];
         function addNode(deviceType) {
             try {
                 if(deviceType == 'network') {
-                    subnet = requestSubnetForNetwork("If a new subnet is required, input desired value:");
+                    subnetName = requestSubnetName("If a new network is required, input the subnet name:");
+                    subnet = requestSubnetForNetwork("Subnet CIDR (Optional_:");
                     nodes.add({
                         id: document.getElementById('node-id').value,
                         type: deviceType,
@@ -130,6 +131,7 @@ var secondSelected = [];
                         label: document.getElementById('node-id').value,
                         image: "/static/images/" + deviceType + ".png",
                         shape: "image",
+                        subnetName: subnetName,
                         subnet: subnet});
                 } else {
                     nodes.add({
@@ -274,6 +276,11 @@ var secondSelected = [];
         function requestSubnetForNetwork(messageToUser){
             var subnet = prompt(messageToUser,""); //Should be only allowed to input ip address block here in the future
             return subnet;
+        }
+
+        function requestSubnetName(messageToUser){
+            var subnetName = prompt(messageToUser,"");
+            return subnetName;
         }
         
         function addTopology(returnedNodes, returnedEdges){
