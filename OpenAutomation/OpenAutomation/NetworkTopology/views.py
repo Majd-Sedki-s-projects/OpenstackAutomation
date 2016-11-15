@@ -14,6 +14,7 @@ from OpenAutomation.NetworkTopology.models import Topology
 from json import dumps, loads
 import os
 import time
+import json
 
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 
@@ -175,10 +176,19 @@ def network_topology(request):
                             name = device_id.get("label")
                             neutron = new_network.create_network(name, body)
 
-                            time.sleep(10)  # WWait to allow network to be set up
+                            time.sleep(5)  # WWait to allow network to be set up
                             networks = neutron.list_networks(name=device_id.get("label"))
                             new_network_id = networks['networks'][0]['id']
-                            subnet = {'name': device_id.get("subnetName"), 'cidr': device_id.get("subnet"), 'network_id': new_network_id, 'ip_version':'4'}
+                            subnet = {'name': device_id.get("subnetName"),
+                                      'cidr': device_id.get("subnet"),
+                                      'network_id': new_network_id,
+                                      'ip_version':'4',
+                                      'enable_dhcp': True,
+                                      'allocation_pools': [
+                                          {"start": device_id.get("dhcp_start"),
+                                           "end": device_id.get("dhcp_end")
+                                           } ]
+                                      }
                             neutron = new_subnet.create_subnet(subnet)
 
                         else:

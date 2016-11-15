@@ -124,6 +124,8 @@ var secondSelected = [];
                 if(deviceType == 'network') {
                     subnetName = requestSubnetName("If a new network is required, input the subnet name:");
                     subnet = requestSubnetForNetwork("Subnet CIDR (Optional_:");
+                    subnetRangeStart = requestSubnetRangeStart("DHCP pool starting address:")
+                    subnetRangeEnd = requestSubnetRangeEnd("DHCP pool ending address:")
                     nodes.add({
                         id: document.getElementById('node-id').value,
                         type: deviceType,
@@ -132,7 +134,9 @@ var secondSelected = [];
                         image: "/static/images/" + deviceType + ".png",
                         shape: "image",
                         subnetName: subnetName,
-                        subnet: subnet});
+                        subnet: subnet,
+                        dhcp_start: subnetRangeStart,
+                        dhcp_end: subnetRangeEnd});
                 } else {
                     nodes.add({
                         id: document.getElementById('node-id').value,
@@ -281,6 +285,16 @@ var secondSelected = [];
         function requestSubnetName(messageToUser){
             var subnetName = prompt(messageToUser,"");
             return subnetName;
+        }
+
+        function requestSubnetRangeStart(messageToUser){
+            var subnetRangeStart = prompt(messageToUser,"");
+            return subnetRangeStart;
+        }
+
+        function requestSubnetRangeEnd(messageToUser){
+            var subnetRangeEnd = prompt(messageToUser,"");
+            return subnetRangeEnd;
         }
         
         function addTopology(returnedNodes, returnedEdges){
