@@ -1,6 +1,9 @@
 var nodes, edges, networkName
 var nodeDataFromPage, edgeDataFromPage, newNodeFromPage, newEdgeFromPage;
-var nodeContents, edgeContents, newNodeContents, newEdgeContents = [];
+var nodeContents = new Array(0);
+var edgeContents = new Array(0);
+var newNodeContents  = new Array(0);
+var newEdgeContents = new Array(0);
 var selectedDevice;
 var removedNodes = [];
 var deployedNodesAndEdges, removedNodesAndEdges = {};
@@ -11,6 +14,7 @@ var secondSelected = [];
             return JSON.stringify(obj, null, 4);
         }
         
+        //On click of node or edge fields on page.
         $(document).ready(function(){
             $('#nodes, #edges').on('click', function(e){
                 nodeDataFromPage = $('#nodes').html();
@@ -27,6 +31,7 @@ var secondSelected = [];
             });
         });
         
+        //On blur (click out of field) on the node or edges on the page.
         $(document).ready(function(){
             $('#nodes, #edges').on('blur', function(e){
                 console.log($('#nodes, #edges').html());
@@ -36,9 +41,11 @@ var secondSelected = [];
 				if(newNodeFromPage.length > 0){
 					newNodeContents = JSON.parse(newNodeFromPage);
 				}
+                
 				if(newEdgeFromPage.length > 0){
 					newEdgeContents = JSON.parse(newEdgeFromPage);
 				}
+                
                 //If node has been removed.
                 if (newNodeContents.length < nodeContents.length){
                     var copyOfNodes = JSON.parse(JSON.stringify(nodeContents));
@@ -75,7 +82,7 @@ var secondSelected = [];
 						edges.remove(copyOfEdges[i]);
 					}
 				}
-				
+				// If edge has been added.
 				if (newNodeContents.length > nodeContents.length){
 					var copyOfNodes = JSON.parse(JSON.stringify(nodeContents));
 					for (var i=0; i<newNodeContents.length;i++){
@@ -89,6 +96,7 @@ var secondSelected = [];
 						nodes.add(copyOfNodes[i]);
 					}
 				}
+                //If updates to any names have been made.
 				if(!_.isEqual(nodeContents, newNodeContents)){
 					for(var i=0; i<newNodeContents.length;i++){
 						nodes.update(newNodeContents[i]);
@@ -100,30 +108,13 @@ var secondSelected = [];
 					}
 				}
             });
-        });
-		 
-		/*function findObjDifferences(obj1, obj2){
-			var differences = {};
-			//If different lengths
-			if(obj1.length !== obj2.length){
-				return false;
-			}
-			for(var i=0; i<obj1.length; i++){
-				for(property in obj1[i]){
-					if(obj1[i][property] !== obj2[i][property]){
-						differences[obj1[i]["id"]] = {}
-						differences[obj1[i]["id"]][property] = obj2[i][property];
-						alert(obj1[i][property] + " is different from " + obj2[i][property]);
-					}
-				}
-			}
-		}*/
+        }); //End of on blur.
 		
         function addNode(deviceType) {
             try {
                 if(deviceType == 'network') {
                     subnetName = requestSubnetName("If a new network is required, input the subnet name:");
-                    subnet = requestSubnetForNetwork("Subnet CIDR (Optional_:");
+                    subnet = requestSubnetForNetwork("Subnet CIDR (Optional):");
                     subnetRangeStart = requestSubnetRangeStart("DHCP pool starting address:")
                     subnetRangeEnd = requestSubnetRangeEnd("DHCP pool ending address:")
                     nodes.add({
@@ -152,7 +143,7 @@ var secondSelected = [];
                 alert(err);
             }
         }
-		
+        
 		function initialLoadAddNetworks(deviceType, networkName){
 			alert(networkName);
 			try{
