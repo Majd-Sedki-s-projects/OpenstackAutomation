@@ -90,7 +90,10 @@ def network_topology(request):
                         elif 'router' in device_id.get("type"):
                             print(device_id.get("label"))
                             new_router = CreateRouter(session)
-                            body = {'name': device_id.get("label")}
+                            ext_net = {"network_id": "fb1879a3-6ec5-4593-8b51-4de72d872f4e", "enable_snat": True}
+                            body = {'name': device_id.get("label"),
+                                    'external_gateway_info': ext_net
+                                    }
                             neutron = new_router.create_router(body)
                         elif 'apache' in device_id.get("type"):
                             print(device_id.get("label"))
@@ -128,7 +131,6 @@ def network_topology(request):
                             new_floatingip = FloatingIP(session)
                             server = new_floatingip.getServer(name=device_id.get("label"))
                             new_floatingip.assignFloatingIP(server)
-
                         elif 'wordpress' in device_id.get("type"):
                             print(device_id.get("label"))
                             print("project path is: " + PROJECT_PATH)
