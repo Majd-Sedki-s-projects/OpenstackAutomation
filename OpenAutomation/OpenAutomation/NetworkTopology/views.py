@@ -105,9 +105,9 @@ def network_topology(request):
                             print("network_exists: " + str(network_exists))
                             if network_exists:
                                 nova, status = new_instance.start_instance(server_name=device_id.get("label"),
-                                                                           image="Ubuntu-16", size="m1.small",
+                                                                           image="Ubuntu 16.04 LTS", size="m1.small",
                                                                            userdata=cloud_init, network_id=network_id)
-                                if status:
+                                if status: 
                                     deployment_status["deployed_successfully"].append("true")
                                     deployment_status["device_name"].append(device_id.get("label"))
                                 elif not status:
@@ -119,7 +119,7 @@ def network_topology(request):
                                 network_id, network_exists = network_info.get_network_id(name=network_name)
                                 print("network_id: " + network_id)
                                 nova, status = new_instance.start_instance(server_name=device_id.get("label"),
-                                                                           image="Ubuntu-16", size="m1.small",
+                                                                           image="Ubuntu 16.04 LTS", size="m1.small",
                                                                            userdata=cloud_init, network_id=network_id)
                                 if status:
                                     deployment_status["deployed_successfully"].append("true")
@@ -169,29 +169,29 @@ def network_topology(request):
                             server = new_floatingip.getServer(name=device_id.get("label"))
                             new_floatingip.assignFloatingIP(server)
                         elif 'network' in device_id.get("type") and not network_exists:
-                            # pass
+                            pass
                             # Currently causes issues. Don't uncomment for now.
-                            print(device_id.get("image"))
-                            new_network = CreateNetwork(session)
-                            new_subnet = CreateSubnet(session)
-                            body = {'name': device_id.get("label"), 'admin_state_up': True}
-                            name = device_id.get("label")
-                            neutron = new_network.create_network(name, body)
+                            #print(device_id.get("image"))
+                            #new_network = CreateNetwork(session)
+                            #new_subnet = CreateSubnet(session)
+                            #body = {'name': device_id.get("label"), 'admin_state_up': True}
+                            #name = device_id.get("label")
+                            #neutron = new_network.create_network(name, body)
 
-                            time.sleep(5)  # WWait to allow network to be set up
-                            networks = neutron.list_networks(name=device_id.get("label"))
-                            new_network_id = networks['networks'][0]['id']
-                            subnet = {'name': device_id.get("subnetName"),
-                                      'cidr': device_id.get("subnet"),
-                                      'network_id': new_network_id,
-                                      'ip_version':'4',
-                                      'enable_dhcp': True,
-                                      'allocation_pools': [
-                                          {"start": device_id.get("dhcp_start"),
-                                           "end": device_id.get("dhcp_end")
-                                           } ]
-                                      }
-                            neutron = new_subnet.create_subnet(subnet)
+                            #time.sleep(5)  # WWait to allow network to be set up
+                            #networks = neutron.list_networks(name=device_id.get("label"))
+                            #new_network_id = networks['networks'][0]['id']
+                            #subnet = {'name': device_id.get("subnetName"),
+                            #          'cidr': device_id.get("subnet"),
+                            #          'network_id': new_network_id,
+                            #          'ip_version':'4',
+                            #          'enable_dhcp': True,
+                            #          'allocation_pools': [
+                            #              {"start": device_id.get("dhcp_start"),
+                            #               "end": device_id.get("dhcp_end")
+                            #               } ]
+                            #          }
+                            #neutron = new_subnet.create_subnet(subnet)
 
                         else:
                             print("")

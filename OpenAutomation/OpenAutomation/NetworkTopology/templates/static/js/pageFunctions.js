@@ -110,6 +110,41 @@ var secondSelected = [];
             });
         }); //End of on blur.
 		
+        /*$("#networkModalSave").click(function(e){
+            var selected = $("#networkNames input:checked").map(function(i,e1){return e1.name;}).get();
+        });*/
+        
+        function updateNetwork(){
+            var selectedNetworks = [];
+            $(".modal-body input:checked").each(function(){
+               selectedNetworks.push($(this).val()); 
+               document.getElementById($(this).val()).disabled = true;
+            });
+            addNetwork(selectedNetworks);
+        }
+        
+        function addNetwork(networkList){
+            try {
+                for(var i=0; i<networkList.length; i++){
+                    if (networkList[i] === "newNetwork"){
+                        $("#newNetworkModal").modal();
+                    }else{
+                        nodes.add({
+                            id: networkList[i],
+                            type: "network",
+                            deployed: "false",
+                            label: networkList[i],
+                            image: "/static/images/network.png",
+                            shape: "image"
+                        });
+                    }
+                }
+            }
+            catch(err){
+                alert(err);
+            }
+        }
+        
         function addNode(deviceType) {
             try {
                 if(deviceType == 'network') {
@@ -415,7 +450,7 @@ var secondSelected = [];
                             if (!linkCreated){
                                 firstSelected = [];
                                 secondSelected = [];
-                                alert("One of the two nodes you are connecting must be a network.");
+                                alert("Only one of the two nodes you are connecting should be a network.");
                             }
                         };
                     });

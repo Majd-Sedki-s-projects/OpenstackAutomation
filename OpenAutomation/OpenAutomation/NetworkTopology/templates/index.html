@@ -9,6 +9,12 @@
 	
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.16.6/lodash.min.js"></script>
     
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.css"/>
+    
     <link rel="stylesheet" type="text/css" href="{% static 'css/formatting.css' %}"/>
     
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.css"/>
@@ -28,76 +34,147 @@
   <a href="../Admin">Admin</a>
   <a href="../Contact">Contact</a>
 </div>
+
 <div id="main">
-<div id="dimmer"></div>
-<h1>OpenAutomation</h1>
-Resize the canvas by scrolling up/down with your mouse/trackpad on the topology. Pan around the canvas by clicking and dragging the space behind the topology.
-<body onload="draw();">
-<table id="nodeID" cellspacing="0" cellpadding="0">
-        <h2>Node</h2>
+    <div id="dimmer"></div>
+    <h1>OpenAutomation</h1>
+    Resize the canvas by scrolling up/down with your mouse/trackpad on the topology. Pan around the canvas by clicking and dragging the space behind the topology.
+    <body onload="draw();">
+        <table id="nodeID" cellspacing="0" cellpadding="0">
+                <h2>Node</h2>
+                    <tr>
+                        <td></td>
+                        <td><label for="node-id">Id</label></td>
+                        <td><input id="node-id" type="text" value=""></td>
+                    </tr>
+        </table>
+        <table id="deviceTable" cellspacing="0" cellpadding="0">
             <tr>
-                <td></td>
-                <td><label for="node-id">Id</label></td>
-                <td><input id="node-id" type="text" value=""></td>
+                <td><label for="node-image">Devices:</label></td>
+                <td><img id = "Router" src = "/static/images/router.png" onclick="addNode('router')" width="111" height="111" onmouseover="" style="cursor: pointer;"/></td>
+                <td><img id = "Network" src = "/static/images/network.png" onmouseover="" style="cursor: pointer;" data-toggle="modal" data-target="#myNetworkModal"/></td>
+                <td><img id = "VM" src = "/static/images/vm.png" onclick="addNode('vm')" width="121" height="121" onmouseover="" style="cursor: pointer;"/></td>
+                <td><img id = "Apache" src = "/static/images/apache.png" onclick="addNode('apache')" width="121" height="121" onmouseover="" style="cursor: pointer;"/></td>
+                <td><img id = "Wordpress" src = "/static/images/wordpress.png" onclick="addNode('wordpress')" width="121" height="121" onmouseover="" style="cursor: pointer;"/></td>
             </tr>
+        </table>
+        <table id="actionTable" cellspacing="0", cellpadding="0">
+            <tr>
+                <button id="submitJson" onclick="deploy();">Deploy to Openstack</button>
+                <button id="node-remove" onclick="removeNode();">Remove from Network</button>
+                <button id="tearDown" onclick="tearDown();">Tear Down from Openstack</button>
+            </tr>
+            <tr>
+                <td><button id="save template" onclick="saveTopology();">Save Topology to Database</button></td>
+                <td><button id="return template" onclick="returnTopology();">Return Topology from Database</button></td>
+                <td><button id="delete template" onclick="deleteTemplate();">Delete topology from Database</button></td>
+                <td>
+                    <form method="POST">
+                        <select id="top_name_retrieve">
+                            {% for entry in topology_name %}
+                                <option value="{{ entry.id }}">{{ entry }}</option>
+                            {% endfor %}
+                        </select>
+                    </form>
+                </td>
+            </tr>
+        </table>
+        
+    <!-- Modal to allow users to select networks to add to the topology.-->
+    <div class="modal fade" id="myNetworkModal" tabindex="-1" role="dialog" aria-labelledby="networkModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="networkModalLabel">Select a network</h4>
+                </div>
+                <div class="modal-body">
+                    <table>
+                        <form id="networkNames">
+                            <ul>
+                                {% for network in network_list %}
+                                    <li><label><input type="checkbox" id="{{network}}" value="{{network}}" name="chosenNetworks">{{network}}</label></li>
+                                {% endfor %}
+                                <li><label><input type="checkbox" id="newNetwork" value="newNetwork">New Network</label></li>
+                            </ul>
+                        </form>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" id="networkModalSave" class="btn btn-primary" onclick="updateNetwork();" data-dismiss="modal">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal to allow users to set new network parameters.-->
+    <div class="modal fade" id="newNetworkModal" tabindex="-1" role="dialog" aria-labelledby="newNetworkModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="newNetworkModalLabel">Create a new network</h4>
+                </div>
+                <div class="modal-body">
+                    <form class="form-horizontal" id="newNetworkForm" role="form">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label" for="SubnetName">Subnet Name</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="SubnetName" placeHolder="Subnet Name" />
+                            </div>
+                        </div>
+                        <div class ="form-group">
+                            <label class="col-sm-2 control-label" for="IPAdress">Subnet Network</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="IPAddress" placeHolder="Subnet IP Address"/>
+                            </div>
+                        </div>
+                         <div class ="form-group">
+                            <label class="col-sm-2 control-label" for="poolStart">DHCP Starting Address</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="poolStart" placeHolder="DHCP Starting Address"/>
+                            </div>
+                        </div>
+                        <div class ="form-group">
+                            <label class="col-sm-2 control-label" for="poolEnd">DHCP Ending Address</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="poolEnd" placeHolder="DHCP Ending Address"/>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" id="networkModalSave" class="btn btn-primary" onclick="updateNetwork();" data-dismiss="modal">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <h1>View</h1>
+        <table class="view">
+            <colgroup>
+                <col width="25%">
+                <col width="25%">
+                <col width="50%">
+            </colgroup>
+            <tr>
+                <td>
+                    <h2>Nodes</h2>
+                    <pre id="nodes" contenteditable="true"></pre>
+                </td>
 
-</table>
-<table id="deviceTable" cellspacing="0" cellpadding="0">
-    <tr>
-        <td><label for="node-image">Devices:</label></td>
-        <td><img id = "Router" src = "/static/images/router.png" onclick="addNode('router')" width="111" height="111" onmouseover="" style="cursor: pointer;"/></td>
-        <td><img id = "Network" src = "/static/images/network.png" onclick="addNode('network')" onmouseover="" style="cursor: pointer;"/></td>
-        <td><img id = "VM" src = "/static/images/vm.png" onclick="addNode('vm')" width="121" height="121" onmouseover="" style="cursor: pointer;"/></td>
-        <td><img id = "Apache" src = "/static/images/apache.png" onclick="addNode('apache')" width="121" height="121" onmouseover="" style="cursor: pointer;"/></td>
-        <td><img id = "Wordpress" src = "/static/images/wordpress.png" onclick="addNode('wordpress')" width="121" height="121" onmouseover="" style="cursor: pointer;"/></td>
-    </tr>
-</table>
-<table id="actionTable" cellspacing="0", cellpadding="0">
-    <tr>
-        <button id="submitJson" onclick="deploy();">Deploy to Openstack</button>
-        <button id="node-remove" onclick="removeNode();">Remove from Network</button>
-        <button id="tearDown" onclick="tearDown();">Tear Down from Openstack</button>
-    </tr>
-    <tr>
-        <td><button id="save template" onclick="saveTopology();">Save Topology to Database</button></td>
-        <td><button id="return template" onclick="returnTopology();">Return Topology from Database</button></td>
-        <td><button id="delete template" onclick="deleteTemplate();">Delete topology from Database</button></td>
-        <td>
-            <form method="POST">
-                <select id="top_name_retrieve">
-                    {% for entry in topology_name %}
-                        <option value="{{ entry.id }}">{{ entry }}</option>
-                    {% endfor %}
-                </select>
-            </form>
-        </td>
-    </tr>
-</table>
+                <td>
+                    <h2>Edges</h2>
+                    <pre id="edges" contenteditable="true"></pre>
+                </td>
 
-<h1>View</h1>
-<table class="view">
-    <colgroup>
-        <col width="25%">
-        <col width="25%">
-        <col width="50%">
-    </colgroup>
-    <tr>
-        <td>
-            <h2>Nodes</h2>
-            <pre id="nodes" contenteditable="true"></pre>
-        </td>
-
-        <td>
-            <h2>Edges</h2>
-            <pre id="edges" contenteditable="true"></pre>
-        </td>
-
-        <td>
-            <h2>Network</h2>
-            <div id="network"></div>
-        </td>
-    </tr>
-</table>
-</body>
+                <td>
+                    <h2>Network</h2>
+                    <div id="network"></div>
+                </td>
+            </tr>
+        </table>
+    </body>
 </div>
 </html>

@@ -38,7 +38,7 @@ html, body {
 
 #main {
     transition: margin-left .5s;
-    padding: 30px;
+    padding: 40px;
 }
 
 .sidenav span.openbtn{
@@ -51,11 +51,46 @@ html, body {
     color: #ffffff;
 }
 
+.launch-modal {
+    margin: 20px;
+}
+
+#networkNames li{
+    display: block;
+    width: 100%;
+}
+
+.modal-body .form-horizontal .col-sm-2,
+.modal-body .form-horizontal .col-sm-10 {
+    width: 100%
+}
+
+.modal-body .form-horizontal .control-label {
+    text-align: left;
+}
+.modal-body .form-horizontal .col-sm-offset-2 {
+    margin-left: 15px;
+}
+
+
+
+.modal-dialog{
+    position: relative;
+    display: table;
+    overflow-y: auto;    
+    overflow-x: auto;
+    width: auto;
+    min-width: 300px;   
+}
+
 @media screen and (max-height: 450px) {
   .sidenav {padding-top: 15-px;}
   .sidenav a {font-size: 18px;}
 }
-
+        ul {
+            list-style-type: none;
+        }
+        
         h1 {
             font-size: 150%;
             margin: 5px 0;
