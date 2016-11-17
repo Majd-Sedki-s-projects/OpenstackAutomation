@@ -109,18 +109,101 @@ var secondSelected = [];
 				}
             });
         }); //End of on blur.
-		
-        /*$("#networkModalSave").click(function(e){
-            var selected = $("#networkNames input:checked").map(function(i,e1){return e1.name;}).get();
-        });*/
         
+        //Add selected networks to an array. Pass it to the addNetwork() function.
         function updateNetwork(){
             var selectedNetworks = [];
-            $(".modal-body input:checked").each(function(){
-               selectedNetworks.push($(this).val()); 
+            $(".networkNameForm input:checked").each(function(){
+               selectedNetworks.push($(this).val());
                document.getElementById($(this).val()).disabled = true;
             });
             addNetwork(selectedNetworks);
+        }
+		
+        // Called when the 'New Network' radio button is selected by the user. Opens a new modal form to ask the user for additional input.
+		function addNewNetwork(){
+            var newNetworkData = [];
+			$(".newNetworkForm input:text").each(function(){
+                newNetworkData.push($(this).val());
+            });
+            var submit = true;
+            var subnetName = $('#SubnetName');
+            var subnetAddr = $('#IPAddress');
+            var dhcp_s = $('#poolStart');
+            var dhcp_e = $('#poolEnd');
+            
+            if (!newNetworkData[0]){
+                subnetName.closest('.form-group').removeClass('has-success').addClass('has-error');
+                submit = false;
+            }else{
+                subnetName.closest('.form-group').removeClass('has-error').addClass('has-success');
+            }
+            
+            if(!newNetworkData[1]){
+                subnetAddr.closest('.form-group').removeClass('has-success').addClass('has-error');
+                submit = false;
+            }else if(!validateIPAddressWithCIDR(newNetworkData[1])){
+                subnetAddr.closest('.form-group').removeClass('has-success').addClass('has-error');
+                submit = false;
+            }else{
+                subnetAddr.closest('.form-group').removeClass('has-error').addClass('has-success');
+            }
+            
+            if(!newNetworkData[2]){
+                dhcp_s.closest('.form-group').removeClass('has-success').addClass('has-error');
+                submit = false;
+            }else if(!validateIPAddressWithoutCIDR(newNetworkData[2])){
+                dhcp_s.closest('.form-group').removeClass('has-success').addClass('has-error');
+                submit = false;
+            }else{
+                dhcp_s.closest('.form-group').removeClass('has-error').addClass('has-success');
+            }
+            
+            if(!newNetworkData[3]){
+                dhcp_e.closest('.form-group').removeClass('has-success').addClass('has-error');
+                submit = false;
+            }else if(!validateIPAddressWithoutCIDR(newNetworkData[3])){
+                dhcp_e.closest('.form-group').removeClass('has-success').addClass('has-error');
+                submit = false;
+            }else{
+                dhcp_e.closest('.form-group').removeClass('has-error').addClass('has-success');
+            }
+            
+            if(submit){
+                
+                try{
+                    nodes.add({
+                        id: newNetworkData[0],
+                        type: "network",
+                        deployed: "false",
+                        label: newNetworkData[0],
+                        image: "/static/images/network.png",
+                        shape: "image",
+                        subnetName: newNetworkData[0],
+                        subnet: newNetworkData[1],
+                        dhcp_start: newNetworkData[2],
+                        dhcp_end: newNetworkData[3]
+                    });
+                    $("#newNetworkModal").modal('hide');
+                }   
+                catch(err){
+                    alert(err);
+                }   
+            }
+        }
+        
+        function validateIPAddressWithCIDR(ipaddress){  
+            if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/(3[0-2]|[1-2]?[0-9])$/.test(ipaddress)){  
+                return (true)  
+            }
+            return false;
+        }
+        
+        function validateIPAddressWithoutCIDR(ipaddress){
+            if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ipaddress)){  
+                return (true)  
+            }
+            return false;
         }
         
         function addNetwork(networkList){
@@ -135,7 +218,11 @@ var secondSelected = [];
                             deployed: "false",
                             label: networkList[i],
                             image: "/static/images/network.png",
-                            shape: "image"
+                            shape: "image",
+                            subnetName: "",
+                            subnet: "",
+                            dhcp_start: "",
+                            dhcp_end: ""
                         });
                     }
                 }
@@ -180,7 +267,6 @@ var secondSelected = [];
         }
         
 		function initialLoadAddNetworks(deviceType, networkName){
-			alert(networkName);
 			try{
 				nodes.add({
 					id: networkName,

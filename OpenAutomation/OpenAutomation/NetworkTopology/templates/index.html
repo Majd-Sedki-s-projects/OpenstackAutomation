@@ -12,7 +12,7 @@
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-
+    
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.css"/>
     
     <link rel="stylesheet" type="text/css" href="{% static 'css/formatting.css' %}"/>
@@ -80,6 +80,7 @@
             </tr>
         </table>
         
+        
     <!-- Modal to allow users to select networks to add to the topology.-->
     <div class="modal fade" id="myNetworkModal" tabindex="-1" role="dialog" aria-labelledby="networkModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -89,16 +90,18 @@
                     <h4 class="modal-title" id="networkModalLabel">Select a network</h4>
                 </div>
                 <div class="modal-body">
-                    <table>
-                        <form id="networkNames">
-                            <ul>
-                                {% for network in network_list %}
-                                    <li><label><input type="checkbox" id="{{network}}" value="{{network}}" name="chosenNetworks">{{network}}</label></li>
-                                {% endfor %}
-                                <li><label><input type="checkbox" id="newNetwork" value="newNetwork">New Network</label></li>
-                            </ul>
-                        </form>
-                    </table>
+                    <div class="networkNameForm">
+                        <table>
+                            <form id="networkNames" role="form">
+                                <ul>
+                                    {% for network in network_list %}
+                                        <li><label><input type="checkbox" id="{{network}}" value="{{network}}" name="chosenNetworks">{{network}}</label></li>
+                                    {% endfor %}
+                                    <li><label><input type="checkbox" id="newNetwork" value="newNetwork">New Network</label></li>
+                                </ul>
+                            </form>
+                        </table>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -107,6 +110,7 @@
             </div>
         </div>
     </div>
+    
     
     <!-- Modal to allow users to set new network parameters.-->
     <div class="modal fade" id="newNetworkModal" tabindex="-1" role="dialog" aria-labelledby="newNetworkModalLabel" aria-hidden="true">
@@ -117,40 +121,44 @@
                     <h4 class="modal-title" id="newNetworkModalLabel">Create a new network</h4>
                 </div>
                 <div class="modal-body">
-                    <form class="form-horizontal" id="newNetworkForm" role="form">
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label" for="SubnetName">Subnet Name</label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control" id="SubnetName" placeHolder="Subnet Name" />
+                    <div class="newNetworkForm">
+                        <form class="form-horizontal" id="newNetworkForm" role="form">
+                            <div class="form-group" id="SubnetName">
+                                <label class="col-sm-2 control-label" for="SubnetName">Subnet Name</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" id="SubnetName" placeHolder="Subnet Name"/>
+                                </div>
                             </div>
-                        </div>
-                        <div class ="form-group">
-                            <label class="col-sm-2 control-label" for="IPAdress">Subnet Network</label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control" id="IPAddress" placeHolder="Subnet IP Address"/>
+                            <div class ="form-group" id="ipAddr">
+                                <label class="col-sm-2 control-label" for="IPAddress">Subnet Network</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" id="IPAddress" placeHolder="Subnet IP Address"/>
+                                </div>
                             </div>
-                        </div>
-                         <div class ="form-group">
-                            <label class="col-sm-2 control-label" for="poolStart">DHCP Starting Address</label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control" id="poolStart" placeHolder="DHCP Starting Address"/>
+                             <div class ="form-group" id="ipAddr">
+                                <label class="col-sm-2 control-label" for="poolStart">DHCP Starting Address</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" id="poolStart" placeHolder="DHCP Starting Address"/>
+                                </div>
                             </div>
-                        </div>
-                        <div class ="form-group">
-                            <label class="col-sm-2 control-label" for="poolEnd">DHCP Ending Address</label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control" id="poolEnd" placeHolder="DHCP Ending Address"/>
+                            <div class ="form-group" id="ipAddr">
+                                <label class="col-sm-2 control-label" for="poolEnd">DHCP Ending Address</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" id="poolEnd" placeHolder="DHCP Ending Address"/>
+                                </div>
                             </div>
-                        </div>
-                    </form>
+                        </form>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    <button type="button" id="networkModalSave" class="btn btn-primary" onclick="updateNetwork();" data-dismiss="modal">Save</button>
+                    <button type="button" id="newNetworkModalSave" class="btn btn-primary" onclick="addNewNetwork();">Save</button>
                 </div>
             </div>
         </div>
     </div>
+    
+    
     <h1>View</h1>
         <table class="view">
             <colgroup>
