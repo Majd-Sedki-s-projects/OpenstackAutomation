@@ -265,22 +265,6 @@ var secondSelected = [];
                 alert(err);
             }
         }
-        
-		function initialLoadAddNetworks(deviceType, networkName){
-			try{
-				nodes.add({
-					id: networkName,
-					type: deviceType,
-					deployed: "true",
-					label: networkName,
-					image: "/static/images/" + deviceType + ".png",
-					shape: "image"
-				});
-			}
-			catch (err){
-				alert(err);
-			}
-		}
 		
         function updateNode() {
             try {
