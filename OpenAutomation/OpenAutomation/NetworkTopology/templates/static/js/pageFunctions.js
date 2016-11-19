@@ -111,7 +111,7 @@ var secondSelected = [];
         }); //End of blur - clicking off editable fields.
         
         // Add a new application to the topology.
-        function addApplications(){
+        function addApplications(applicationRequirements){
             var applicationName = $('input[name=appName]:checked', '.applicationNameForm')[0].value
             
             html = '<div class="modal-dialog">'

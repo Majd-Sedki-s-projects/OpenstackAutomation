@@ -59,7 +59,7 @@
                         <td><input id="node-id" type="text" value=""></td>
                     </tr>
         </table>
-        <table id="deviceTable" cellspacing="0" cellpadding="0">
+        <table class="deviceTable" id="deviceTable" cellspacing="0" cellpadding="0">
             <tr>
                 <td><label for="node-image">Devices:</label></td>
                 <td><img id = "Router" src = "/static/images/router.png" onclick="addNode('router')" width="111" height="111" onmouseover="" style="cursor: pointer;"/></td>
@@ -69,6 +69,12 @@
                 <td><img id = "Wordpress" src = "/static/images/wordpress.png" onclick="addNode('wordpress')" width="121" height="121" onmouseover="" style="cursor: pointer;"/></td>
             </tr>
         </table>
+        <div class="container">
+            <div class="btn-group-vertical">
+                <td><button type="button" class="btn btn-success btn-lg">Add Application</button>
+                <td><button type="button" class="btn btn-danger btn-lg">Remove Application</button>
+            </div>
+        </div>
         <table id="actionTable" cellspacing="0", cellpadding="0">
             <tr>
                 <button id="submitJson" onclick="deploy();">Deploy to Openstack</button>

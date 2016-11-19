@@ -100,6 +100,21 @@ html, body {
     min-width: 300px;   
 }
 
+.deviceTable{
+    float:left;
+    overflow: auto;
+}
+
+.container{
+    margin: 0 auto;
+}
+
+.btn-group-vertical{
+    float: left;
+    margin-left: 15px;
+    margin-top: 10px;
+}
+
 @media screen and (max-height: 450px) {
   .sidenav {padding-top: 15-px;}
   .sidenav a {font-size: 18px;}
