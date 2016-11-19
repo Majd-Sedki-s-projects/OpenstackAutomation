@@ -1,6 +1,5 @@
 from django.db import models
 from django_mysql.models import JSONField
-from django.core import serializers
 
 
 class Topology(models.Model):
@@ -12,3 +11,14 @@ class Topology(models.Model):
 
     def __str__(self):
         return self.topology_name
+
+
+class NetworkApplications(models.Model):
+    application_name = models.CharField(max_length=25, default="NO_APP_NAME_PROVIDED")
+    application_requirements = JSONField()
+
+    class Meta:
+        app_label = "NetworkTopology"
+
+    def __str__(self):
+        return self.application_name

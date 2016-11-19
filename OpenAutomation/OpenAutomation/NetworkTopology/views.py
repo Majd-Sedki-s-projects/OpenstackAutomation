@@ -10,7 +10,7 @@ from ..OpenstackCommunication.ParseEdges import ParseEdges
 from ..OpenstackCommunication.Utils import Utils
 from ..OpenstackCommunication.CreateSubnet import CreateSubnet
 from ast import literal_eval
-from OpenAutomation.NetworkTopology.models import Topology
+from OpenAutomation.NetworkTopology.models import Topology, NetworkApplications
 from json import dumps, loads
 import os
 import time
@@ -107,7 +107,7 @@ def network_topology(request):
                                 nova, status = new_instance.start_instance(server_name=device_id.get("label"),
                                                                            image="Ubuntu 16.04 LTS", size="m1.small",
                                                                            userdata=cloud_init, network_id=network_id)
-                                if status: 
+                                if status:
                                     deployment_status["deployed_successfully"].append("true")
                                     deployment_status["device_name"].append(device_id.get("label"))
                                 elif not status:
@@ -171,17 +171,17 @@ def network_topology(request):
                         elif 'network' in device_id.get("type") and not network_exists:
                             pass
                             # Currently causes issues. Don't uncomment for now.
-                            #print(device_id.get("image"))
-                            #new_network = CreateNetwork(session)
-                            #new_subnet = CreateSubnet(session)
-                            #body = {'name': device_id.get("label"), 'admin_state_up': True}
-                            #name = device_id.get("label")
-                            #neutron = new_network.create_network(name, body)
+                            # print(device_id.get("image"))
+                            # new_network = CreateNetwork(session)
+                            # new_subnet = CreateSubnet(session)
+                            # body = {'name': device_id.get("label"), 'admin_state_up': True}
+                            # name = device_id.get("label")
+                            # neutron = new_network.create_network(name, body)
 
-                            #time.sleep(5)  # WWait to allow network to be set up
-                            #networks = neutron.list_networks(name=device_id.get("label"))
-                            #new_network_id = networks['networks'][0]['id']
-                            #subnet = {'name': device_id.get("subnetName"),
+                            # time.sleep(5)  # WWait to allow network to be set up
+                            # networks = neutron.list_networks(name=device_id.get("label"))
+                            # new_network_id = networks['networks'][0]['id']
+                            # subnet = {'name': device_id.get("subnetName"),
                             #          'cidr': device_id.get("subnet"),
                             #          'network_id': new_network_id,
                             #          'ip_version':'4',
@@ -191,7 +191,7 @@ def network_topology(request):
                             #               "end": device_id.get("dhcp_end")
                             #               } ]
                             #          }
-                            #neutron = new_subnet.create_subnet(subnet)
+                            # neutron = new_subnet.create_subnet(subnet)
 
                         else:
                             print("")
@@ -200,12 +200,12 @@ def network_topology(request):
                 return JsonResponse(deployment_status, safe=False)
             elif data[0].get("action") == "save_template":
                 print("Saving template attempt")
-                data_struct = literal_eval(request_data.decode())
+                topology_data = literal_eval(request_data.decode())
                 template = Topology()
-                template.topology_name = data_struct[0].get("topology_name")
-                data_struct.pop(0)
+                template.topology_name = topology_data[0].get("topology_name")
+                topology_data.pop(0)
                 # Convert to JSON before sending to database
-                template.topology_json = dumps(data_struct)
+                template.topology_json = dumps(topology_data)
                 template.save()
                 print("DATABASE UPDATED")
             elif data[0].get("action") == "return_topology":
@@ -230,4 +230,7 @@ def network_topology(request):
     topology_name = list(Topology.objects.values_list('topology_name', flat=True))
     # Get a list of networks
     network_list = utilities.get_network_list()
-    return render(request, "index.html", {'topology_name': topology_name, 'network_list': network_list})
+    # Get a list of applications from the database.
+    application_names = list(NetworkApplications.objects.values_list('application_name', flat=True))
+    return render(request, "index.html", {'topology_name': topology_name, 'network_list': network_list,
+                                          'application_names': application_names})

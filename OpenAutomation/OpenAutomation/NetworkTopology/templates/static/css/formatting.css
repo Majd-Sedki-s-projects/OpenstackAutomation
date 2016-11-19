@@ -41,6 +41,25 @@ html, body {
     padding: 40px;
 }
 
+#appList, #appList2, #appList3, #appList4 {
+    border: 1px solid #eee;
+    width: 142px;
+    min-height: 20px;
+    list-style-type: none;
+    margin: 0;
+    padding: 5px 0 0 0;
+    float: left;
+    margin-right: 10px;
+  }
+  
+  #appList li, #appList2 li, #appList3 li, #appList4 li{
+    margin: 0 5px 5px 5px;
+    padding: 5px;
+    font-size: 1.2em;
+    width: 120px;
+    height: 2.0em;
+  }
+  
 .sidenav span.openbtn{
     position: absolute;
     top: 0;

@@ -108,7 +108,70 @@ var secondSelected = [];
 					}
 				}
             });
-        }); //End of on blur.
+        }); //End of blur - clicking off editable fields.
+        
+        // Add a new application to the topology.
+        function addApplications(){
+            var applicationName = $('input[name=appName]:checked', '.applicationNameForm')[0].value
+            
+            html = '<div class="modal-dialog">'
+            html += '<div class="modal-content">'
+            html += '<div class="modal-header">'
+            html += '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>'
+            html += '<h4 class="modal-title" id="selectApplicationModalLabel">' + applicationName +'</h4>'
+            html += '</div>'
+            html += '<div class="modal-body">'
+            html += '<div class="newApplicationRequirements">'
+            html += '<table>'
+            html += '<form id="applicationRequirementNames" role="form">'
+            //*****************START - ADD THE FORM DATA DYNAMICALLY BELOW****************
+            // This will be changed to being more dynamic based on values passed from the database.
+            html += '<label><ul id="appList" class ="connectedSortable">Applications</label>'
+            html += '<li class="ui-state-default">Wordpress</li>'
+            html += '<li class="ui-state-default">Apache</li>'
+            html += '<li class="ui-state-default">MYSQL</li>'
+            html += '</ul>'
+            html += '<label><ul id="appList2" class ="connectedSortable">VM1</label>'
+            html += '</ul>'
+            html += '<label><ul id="appList3" class ="connectedSortable">VM2</label>'
+            html += '</ul>'
+            html += '<label><ul id="appList4" class ="connectedSortable">VM3</label>'
+            html += '</ul>'
+            //*****************END   - ADD THE FORM DATA DYNAMICALLY ABOVE****************
+            html += '</form>'
+            html += '</table>'
+            html += '</div>'
+            html += '</div>'
+            html += '<div class="modal-footer">'
+            html += '<button type="button" class="btn btn-default" data-dismiss="modal" onclick="destroyModal("Application-Modal")">Close</button>'
+            html += '<button type="button" id="applicationModalSave" class="btn btn-primary" data-dismiss="modal">Save</button>'
+            html += '</div>'
+            html += '</div>'
+            html += '</div>'
+            html += '</div>'
+            $('#Select-Application-VMs-Modal').html(html);
+            $( function() {
+                $( "#appList, #appList2, #appList3, #appList4" ).sortable({
+                  placeholder: "ui-state-highlight",
+                  connectWith: ".connectedSortable"
+                }).disableSelection();
+            });
+            $("#Select-Application-VMs-Modal").modal();
+            destroyModal('Application-Modal');
+        }
+        
+        // Clears a modal of any entered text.
+        function destroyModal(modalID){
+            $('#'+modalID).on('hidden.bs.modal', function (e) {
+              $(this)
+                .find("input, textarea, select")
+                   .val('')
+                   .end()
+                .find("input[type=checkbox], input[type=radio]")
+                   .prop("checked", "")
+                   .end();
+            })
+        }
         
         //Add selected networks to an array. Pass it to the addNetwork() function.
         function updateNetwork(){
@@ -230,6 +293,8 @@ var secondSelected = [];
             catch(err){
                 alert(err);
             }
+            destroyModal("myNetworkModal");
+            destroyModal("newNetworkModal");
         }
         
         function addNode(deviceType) {

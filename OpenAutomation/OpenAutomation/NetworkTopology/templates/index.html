@@ -3,21 +3,32 @@
 <html>
 <head>
     {% load static %}
+    <!-- Jquery CDN links-->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    
+    <link rel="stylesheet" type="text/css" href="http://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"/>
+    
+    <!-- VIS JS (Network Topology) CDN links-->
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.min.js"></script>
+    
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.css"/>
+    
+    <!-- Lodash (used for various functions) CDN links-->
 	
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.16.6/lodash.min.js"></script>
+    
+    <!-- Bootstrap CDN links-->
     
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
     
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.css"/>
+    <!-- Local JS and CSS files-->
     
     <link rel="stylesheet" type="text/css" href="{% static 'css/formatting.css' %}"/>
-    
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.css"/>
     
     <script type="text/javascript" src="{% static 'js/pageFunctions.js' %}"></script>
 
@@ -53,7 +64,7 @@
                 <td><label for="node-image">Devices:</label></td>
                 <td><img id = "Router" src = "/static/images/router.png" onclick="addNode('router')" width="111" height="111" onmouseover="" style="cursor: pointer;"/></td>
                 <td><img id = "Network" src = "/static/images/network.png" onmouseover="" style="cursor: pointer;" data-toggle="modal" data-target="#myNetworkModal"/></td>
-                <td><img id = "VM" src = "/static/images/vm.png" onclick="addNode('vm')" width="121" height="121" onmouseover="" style="cursor: pointer;"/></td>
+                <td><img id = "VM" src = "/static/images/vm.png" width="121" height="121" onmouseover="" style="cursor: pointer;" data-toggle="modal" data-target="#Application-Modal"/></td>
                 <td><img id = "Apache" src = "/static/images/apache.png" onclick="addNode('apache')" width="121" height="121" onmouseover="" style="cursor: pointer;"/></td>
                 <td><img id = "Wordpress" src = "/static/images/wordpress.png" onclick="addNode('wordpress')" width="121" height="121" onmouseover="" style="cursor: pointer;"/></td>
             </tr>
@@ -80,7 +91,43 @@
             </tr>
         </table>
         
-        
+        <!-- Modal to allow users to select applications to add to the topology.-->
+    <div class="modal fade" id="Application-Modal" tabindex="-1" role="dialog" aria-labelledby="applicationModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="applicationModalLabel">Select an application</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="applicationNameForm">
+                        <table>
+                            <form id="applicationNames" role="form">
+                                <ul>
+                                    <!--{% for application in application_names %}
+                                        <li><label><input type="radio" id="{{application}}" value="{{application}}" name="chosenApplications">{{application}}</label></li>
+                                    {% endfor %}-->
+                                    <li><label><input type="radio" name="appName" id="newWordpress" value="Wordpress">New Wordpress Instance</label></li>
+                                    <li><label><input type="radio" name="appName" id="newApache" value="Apache">New Apache Instance</label></li>
+                                </ul>
+                            </form>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal" onclick="destroyModal('Application-Modal')">Close</button>
+                    <button type="button" id="applicationModalSave" class="btn btn-primary" onclick="addApplications();" data-dismiss="modal">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Dynamically created modal-->
+    <div class="modal fade" id="Select-Application-VMs-Modal" tabindex="-1" role="dialog" aria-labelledby="selectApplicationModalLabel" aria-hidden="true"></div>
+    
+    
+    
+    
     <!-- Modal to allow users to select networks to add to the topology.-->
     <div class="modal fade" id="myNetworkModal" tabindex="-1" role="dialog" aria-labelledby="networkModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -110,7 +157,6 @@
             </div>
         </div>
     </div>
-    
     
     <!-- Modal to allow users to set new network parameters.-->
     <div class="modal fade" id="newNetworkModal" tabindex="-1" role="dialog" aria-labelledby="newNetworkModalLabel" aria-hidden="true">
@@ -157,6 +203,10 @@
             </div>
         </div>
     </div>
+    
+    
+    
+    
     
     
     <h1>View</h1>
