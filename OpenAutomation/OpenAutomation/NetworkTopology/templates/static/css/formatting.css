@@ -1,7 +1,7 @@
 html, body {
             font-family: "Lato", sans-serif;
             transition: background-color .5s;
-        }
+          }
 .sidenav {
     height: 100%;
     width: 30px;
@@ -41,7 +41,11 @@ html, body {
     padding: 40px;
 }
 
-#appList, #appList2, #appList3, #appList4 {
+#newApplicationName{
+    width: 100%;
+}
+
+#appList, #VM0, #VM1, #VM2,#VM3, #VM4, #VM5, #VM6 {
     border: 1px solid #eee;
     width: 142px;
     min-height: 20px;
@@ -52,7 +56,7 @@ html, body {
     margin-right: 10px;
   }
   
-  #appList li, #appList2 li, #appList3 li, #appList4 li{
+  #appList li, #VM0 li, #VM1 li, #VM2 li, #VM3 li, #VM4 li, #VM5 li, #VM6 li{
     margin: 0 5px 5px 5px;
     padding: 5px;
     font-size: 1.2em;
@@ -77,6 +81,12 @@ html, body {
 #networkNames li{
     display: block;
     width: 100%;
+}
+
+.model-footer{
+    text-align: right;
+    margin-bottom: 5px;
+    margin-right: 5px;
 }
 
 .modal-body .form-horizontal .col-sm-2,
@@ -141,9 +151,8 @@ html, body {
             vertical-align: top;
         }
         
-        #nodeID{
-            background-color: #f5f5f5;
-            border: 1px solid "white"; 
+        label {
+            padding-right:10px;
         }
         
         #dimmer{

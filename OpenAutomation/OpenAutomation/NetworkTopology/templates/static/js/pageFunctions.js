@@ -9,6 +9,7 @@ var removedNodes = [];
 var deployedNodesAndEdges, removedNodesAndEdges = {};
 var firstSelected = [];
 var secondSelected = [];
+var sortableListNames = "";
         // convenience method to stringify a JSON object
         function toJSON(obj) {
             return JSON.stringify(obj, null, 4);
@@ -110,54 +111,60 @@ var secondSelected = [];
             });
         }); //End of blur - clicking off editable fields.
         
-        // Add a new application to the topology.
+        // Drag and drop sortable list. Used to select different VMs for each application.
         function addApplications(applicationRequirements){
-            var applicationName = $('input[name=appName]:checked', '.applicationNameForm')[0].value
+            sortableListNames = '#appList';
+            var appID = parseInt($('input[name=appName]:checked', '.applicationNameForm')[0].id);
+            var selectedAppName = $('input[name=appName]:checked', '.applicationNameForm')[0].value;
+            var applicationRequirements = applicationRequirements[appID];
+            htmlInitData = '<label><ul id="appList" class ="connectedSortable">Applications</label>'
+            $('#newAppList').append(htmlInitData);
+            htmlInitData = "";
+            for (var i=0; i<applicationRequirements.length; i++){
+                htmlInitData += '<li class="ui-state-default" value="' + applicationRequirements[i] + '">'+applicationRequirements[i]+'</li>'
+            }
+            htmlInitData += '</ul>'
+            var htmlVMData = ""
+            for (var i=0; i<applicationRequirements.length;i++){
+                htmlVMData += '<label><ul id="VM'+i+'"'+'class ="connectedSortable">'+ 'VM'+i+'</label>'
+                htmlVMData += '</ul>'
+                sortableListNames += ',#VM'+i
+            }
+            $("h4.modal-title").text(selectedAppName)
+            $('#newAppList #appList').append(htmlInitData)
+            $('#newAppList').append(htmlVMData)
             
-            html = '<div class="modal-dialog">'
-            html += '<div class="modal-content">'
-            html += '<div class="modal-header">'
-            html += '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>'
-            html += '<h4 class="modal-title" id="selectApplicationModalLabel">' + applicationName +'</h4>'
-            html += '</div>'
-            html += '<div class="modal-body">'
-            html += '<div class="newApplicationRequirements">'
-            html += '<table>'
-            html += '<form id="applicationRequirementNames" role="form">'
-            //*****************START - ADD THE FORM DATA DYNAMICALLY BELOW****************
-            // This will be changed to being more dynamic based on values passed from the database.
-            html += '<label><ul id="appList" class ="connectedSortable">Applications</label>'
-            html += '<li class="ui-state-default">Wordpress</li>'
-            html += '<li class="ui-state-default">Apache</li>'
-            html += '<li class="ui-state-default">MYSQL</li>'
-            html += '</ul>'
-            html += '<label><ul id="appList2" class ="connectedSortable">VM1</label>'
-            html += '</ul>'
-            html += '<label><ul id="appList3" class ="connectedSortable">VM2</label>'
-            html += '</ul>'
-            html += '<label><ul id="appList4" class ="connectedSortable">VM3</label>'
-            html += '</ul>'
-            //*****************END   - ADD THE FORM DATA DYNAMICALLY ABOVE****************
-            html += '</form>'
-            html += '</table>'
-            html += '</div>'
-            html += '</div>'
-            html += '<div class="modal-footer">'
-            html += '<button type="button" class="btn btn-default" data-dismiss="modal" onclick="destroyModal("Application-Modal")">Close</button>'
-            html += '<button type="button" id="applicationModalSave" class="btn btn-primary" data-dismiss="modal">Save</button>'
-            html += '</div>'
-            html += '</div>'
-            html += '</div>'
-            html += '</div>'
-            $('#Select-Application-VMs-Modal').html(html);
             $( function() {
-                $( "#appList, #appList2, #appList3, #appList4" ).sortable({
+                $(sortableListNames).sortable({
                   placeholder: "ui-state-highlight",
                   connectWith: ".connectedSortable"
                 }).disableSelection();
             });
+            
             $("#Select-Application-VMs-Modal").modal();
             destroyModal('Application-Modal');
+        }
+        
+        function saveSelectedAppList(){
+            var dataInList = {};
+            var sortableLists = sortableListNames.replace('#appList,','');
+            sortableLists = sortableLists.split(',');
+            for (var i=0; i<sortableLists.length; i++){
+                var sortableListData = $("#newAppList " + sortableLists[i].replace(',',''));
+                var data = sortableListData[0]["children"];
+                for (var j=0; j<data.length;j++){
+                    if (j == 0){
+                        dataInList[sortableLists[i]] = [];
+                    }
+                    dataInList[sortableLists[i]].push(data[j].textContent);
+                }
+            }
+            resetSortable();
+        }
+        
+        function resetSortable(){
+            $('#newAppList #appList').html('');
+            $('#newAppList').html('');
         }
         
         // Clears a modal of any entered text.
@@ -172,6 +179,50 @@ var secondSelected = [];
                    .end();
             })
         }
+        
+        
+        function addNewApplication(){
+            var newNetworkData = [];
+			$(".newApplicationForm input:text").each(function(){
+                newNetworkData.push($(this).val());
+            });
+            var submit = true;
+            var networkName = $('#applicationName');
+            var networkReqs = $('#applicationRequirements');
+            var imageFile = $('#applicationImage');
+            
+            if (newNetworkData[0].length == 0){
+                networkName.closest('.form-group').removeClass('has-success').addClass('has-error');
+                submit = false;
+            }else if(newNetworkData[1].length == 0){
+                networkReqs.closest('.form-group').removeClass('has-success').addClass('has-error');
+                submit = false;
+            }
+            if(submit){
+                $.ajax({
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    method: 'POST',
+                    url: '/Home/NetworkTopology/',
+                    dataType: 'json',
+                    data: "[{'action': 'add_application'}," + "[{'application_info':" + "'" + JSON.stringify(newNetworkData) + "'" + "}]]"
+                });
+                destroyModal('newApplicationModal');
+            }
+            
+        }
+        
+        function removeApplication(){
+            var appToRemove = $("#applicationRemoval option:selected").text();
+            $.ajax({
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                method: 'POST',
+                url: '/Home/NetworkTopology/',
+                dataType: 'json',
+                data: "[{'action': 'remove_application'}," + "[{'application_info':" + "'" + JSON.stringify(appToRemove) + "'" + "}]]"
+            });
+            destroyModal('removeApplicationModal');
+        }
+        
         
         //Add selected networks to an array. Pass it to the addNetwork() function.
         function updateNetwork(){
@@ -299,32 +350,14 @@ var secondSelected = [];
         
         function addNode(deviceType) {
             try {
-                if(deviceType == 'network') {
-                    subnetName = requestSubnetName("If a new network is required, input the subnet name:");
-                    subnet = requestSubnetForNetwork("Subnet CIDR (Optional):");
-                    subnetRangeStart = requestSubnetRangeStart("DHCP pool starting address:")
-                    subnetRangeEnd = requestSubnetRangeEnd("DHCP pool ending address:")
-                    nodes.add({
-                        id: document.getElementById('node-id').value,
-                        type: deviceType,
-                        deployed: "false",
-                        label: document.getElementById('node-id').value,
-                        image: "/static/images/" + deviceType + ".png",
-                        shape: "image",
-                        subnetName: subnetName,
-                        subnet: subnet,
-                        dhcp_start: subnetRangeStart,
-                        dhcp_end: subnetRangeEnd});
-                } else {
-                    nodes.add({
-                        id: document.getElementById('node-id').value,
-                        type: deviceType,
-                        deployed: "false",
-                        label: document.getElementById('node-id').value,
-                        image: "/static/images/" + deviceType + ".png",
-                        shape: "image"
-                    });
-                }
+                nodes.add({
+                    id: document.getElementById('node-id').value,
+                    type: deviceType,
+                    deployed: "false",
+                    label: document.getElementById('node-id').value,
+                    image: "/static/images/" + deviceType + ".png",
+                    shape: "image"
+                });
             }
             catch (err) {
                 alert(err);

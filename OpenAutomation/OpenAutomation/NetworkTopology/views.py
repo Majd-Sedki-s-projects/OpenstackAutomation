@@ -225,12 +225,26 @@ def network_topology(request):
                     print("Deleted: " + deleted_instance)
                     new_instance.delete_instance_by_name(instance_name=deleted_instance)
                 print("Instances removed")
-
+            elif data[0].get("action") == "add_application":
+                new_application = NetworkApplications()
+                application_data = data.pop(1)
+                application_data = literal_eval(application_data[0]["application_info"])
+                new_application.application_name = application_data[0]
+                new_application.application_requirements = dumps(application_data[1].split(','))
+                new_application.save()
+                print("ADDED NEW APPLICATION TO DB")
+            elif data[0].get("action") == "remove_application":
+                application_data = data.pop(1)
+                application_name = literal_eval(application_data[0]["application_info"])
+                print(application_name)
+                NetworkApplications.objects.filter(application_name=application_name).delete()
+                print("APPLICATION DELETED")
     # Get a list of topology names from MySQL DB.
     topology_name = list(Topology.objects.values_list('topology_name', flat=True))
     # Get a list of networks
     network_list = utilities.get_network_list()
     # Get a list of applications from the database.
     application_names = list(NetworkApplications.objects.values_list('application_name', flat=True))
+    application_reqs = list(NetworkApplications.objects.values_list('application_requirements', flat=True))
     return render(request, "index.html", {'topology_name': topology_name, 'network_list': network_list,
-                                          'application_names': application_names})
+                                          'application_names': application_names, 'application_reqs': application_reqs})
