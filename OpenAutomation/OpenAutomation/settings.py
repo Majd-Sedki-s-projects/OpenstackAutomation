@@ -56,7 +56,9 @@ ROOT_URLCONF = 'OpenAutomation.urls'
 
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 
-MEDIA_ROOT = os.path.join(PROJECT_PATH, 'media/')
+MEDIA_URL = '/media/'
+
+MEDIA_ROOT = os.path.join(PROJECT_PATH, 'media')
 
 TEMPLATES = [
     {

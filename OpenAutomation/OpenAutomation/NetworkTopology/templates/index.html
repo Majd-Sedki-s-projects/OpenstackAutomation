@@ -10,6 +10,10 @@
     
     <link rel="stylesheet" type="text/css" href="http://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"/>
     
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.0.1/jquery-confirm.min.js" integrity="sha256-qoEbsWr9pdk2mgz+rNpgjI+6o1f/veYGHmSUzbVcCEE=" crossorigin="anonymous"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.0.1/jquery-confirm.min.css" integrity="sha256-2XBQS9Flg05mSVHjl4FyxDsSXttSu1JwOX7oqHISwNM=" crossorigin="anonymous" />
+    
     <!-- VIS JS (Network Topology) CDN links-->
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.min.js"></script>
@@ -25,7 +29,7 @@
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-    
+        
     <!-- Local JS and CSS files-->
     
     <link rel="stylesheet" type="text/css" href="{% static 'css/formatting.css' %}"/>
@@ -82,7 +86,7 @@
                 <button type="button" id="tearDown" class="btn btn-default btn-sm" onclick="tearDown();">Tear Down from Openstack</button>
             </tr>
             <tr>
-                <td><button type="button "id="save template" class="btn btn-default btn-sm" onclick="saveTopology();">Save Topology to Database</button></td>
+                <td><button type="button "id="save template" class="btn btn-default btn-sm" data-toggle="modal" data-target="#saveTopologyModal">Save Topology to Database</button></td>
                 <td><button type="button" id="return template" class="btn btn-default btn-sm" onclick="returnTopology();">Return Topology from Database</button></td>
                 <td><button type="button "id="delete template" class="btn btn-default btn-sm" onclick="deleteTemplate();">Delete topology from Database</button></td>
                 <td>
@@ -99,9 +103,34 @@
     
     
     
-    
-    
-    
+    <div class="modal fade" id="saveTopologyModal" tabindex="-1" role="dialog" aria-labelledby="saveTopologyModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="saveTopologyModalLabel">Enter a name for this topology</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="newTopologyForm">
+                        <form class="form-horizontal" id="newTopologyForm" role="form">
+                            <div class="form-group" id="topologyName">
+                                <label class="col-sm-2 control-label" for="topologyName">Topology Name</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" id="topologyName" placeHolder="Topology Name"/>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal" onclick="destroyModal('saveTopologyModal');">Close</button>
+                    <button type="button" id="newNetworkModalSave" class="btn btn-primary" onclick="saveTopology();" data-dismiss="modal" >Save topology</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+                
     <!-- New Application Modal - Used to add applications to the DB -->
     <div class="modal fade" id="newApplicationModal" tabindex="-1" role="dialog" aria-labelledby="addNewApplicationModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -120,29 +149,37 @@
                                 </div>
                             </div>
                             <div class ="form-group" id="applicationRequirements">
-                                <label class="col-sm-2 control-label" for="applicationRequirements">Application Requirements</label>
+                                <label class="col-sm-2 control-label" for="applicationRequirements">Application Requirements (Enter comma separated values)</label>
                                 <div class="col-sm-10">
                                     <input type="text" class="form-control" id="applicationRequirements" placeHolder="Application Requirements"/>
                                 </div>
                             </div>
-                             <!--<div class ="form-group" id="ipAddr">
-                                <label class="col-sm-2 control-label" for="applicationImage">Application Image</label>
-                                <div class="col-sm-10">
-                                    <input type="file" class="form-control btn btn-default btn-file" id="applicationImage"/>
-                                </div>
-                            </div>-->
-                        </form>
+							<div class="form-group" id="osAllowed">
+								<label>Select one or both OS options to use with this application.</label>
+								<ul>
+									<li><label><input type="radio" id="Centos6" value="Centos6" name="chosenOS">Centos6</label></li>
+									<li><label><input type="radio" id="Ubuntu" value="Ubuntu" name="chosenOS">Ubuntu</label></li>
+								</ul>
+							</div>
+						</form>
+                        <!--<form method="post" enctype="multipart/form-data" id="post-form">{% csrf_token %}
+                            {{form.as_p}}
+                            <!--<div class="form-actions">
+                                <button type="submit" id="newNetworkModalSave" class="btn btn-primary" >Save</button>
+                            </div>
+                            <input type="submit" class="btn btn-primary" onclick="addNewApplication();">Save</button>
+                        </form>-->
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal" onclick="destroyModal('newApplicationModal');">Close</button>
-                    <button type="button" id="newNetworkModalSave" class="btn btn-primary" onclick="addNewApplication();">Save</button>
+                    <button type="button" id="newNetworkModalSave" class="btn btn-primary" onclick="addNewApplication();" data-dismiss="modal" >Save</button>
                 </div>
             </div>
         </div>
     </div>
     
-    <!-- New Application Modal - Used to add applications to the DB -->
+    <!-- New Application Modal - Used to remove applications from the DB -->
     <div class="modal fade" id="removeApplicationModal" tabindex="-1" role="dialog" aria-labelledby="removeApplicationModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -155,9 +192,6 @@
                         <form class="form-horizontal text-center" id="removeApplicationForm" role="form">
                             <div class="form-group" id="removedApplicationName">
                                 <select type="button" class="btn btn-default dropdown-toggle btn-sm" id="applicationRemoval">
-                                    <!--{% for entry in topology_name %}
-                                        <option value="{{ entry.id }}">{{ entry }}</option>
-                                    {% endfor %}-->
                                     <option disabled selected>Select an application to remove</option>
                                     {% for application in application_names %}
                                         <option value="{{application}}">{{application}}</option>
@@ -169,7 +203,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal" onclick="destroyModal('removeApplicationModal')">Close</button>
-                    <button type="button" id="newNetworkModalSave" class="btn btn-primary" onclick="removeApplication();">Save</button>
+                    <button type="button" id="newNetworkModalSave" class="btn btn-primary" onclick="removeApplication();" data-dismiss="modal">Save</button>
                 </div>
             </div>
         </div>
@@ -193,9 +227,11 @@
                         <table>
                             <form id="applicationNames" role="form">
                                 <ul>
+									<label> Select an application</label>
                                     {% for application in application_names %}
                                         <li><label><input type="radio" id="{{forloop.counter0}}" value="{{application}}" name="appName">New {{application}} Instance</label></li>
                                     {% endfor %}
+								</ul>
                                     <!--<li><label><input type="radio" name="appName" id="newWordpress" value="Wordpress">New Wordpress Instance</label></li>
                                     <li><label><input type="radio" name="appName" id="newApache" value="Apache">New Apache Instance</label></li>-->
                                 </ul>
@@ -221,13 +257,28 @@
                 </div>
                 <div class="modal-body">
                     <div class="newApplicationRequirements">
-                        <table>
-                            <form id="applicationRequirementNames" role="form">
-                                <div id="newAppList">
+						<form id="applicationRequirementNames" role="form">
+							<div id="newAppList">
 
-                                </div>
-                            </form>
-                        </table>
+							</div>
+						</form>
+						<form role="form">
+							
+						</form>
+						<!--<form role="form">
+							<ul>
+								<label> Select an OS </label>
+									<li><label><input type="radio" value="{{application_os}}" name="appOSName">{{application_os}}</label></li>
+								</ul>
+						</form>-->
+						<form class="form-horizontal" id="newVMForm" role="form">
+							<div class="form-group" id="vmGroupName">
+								<label class="col-sm-2 control-label" for="vmGroupName">VM Group Name</label>
+								<div class="col-sm-10">
+									<input type="text" class="form-control" id="vmGroupName" placeHolder="VM Group Name"/>
+								</div>
+							</div>
+						</form>
                     </div>
                 </div>
                 <div class="model-footer">
@@ -287,19 +338,19 @@
                                 </div>
                             </div>
                             <div class ="form-group" id="ipAddr">
-                                <label class="col-sm-2 control-label" for="IPAddress">Subnet Network</label>
+                                <label class="col-sm-2 control-label" for="IPAddress">Subnet Network (i.e. 10.0.0.0/24)</label>
                                 <div class="col-sm-10">
                                     <input type="text" class="form-control" id="IPAddress" placeHolder="Subnet IP Address"/>
                                 </div>
                             </div>
                              <div class ="form-group" id="ipAddr">
-                                <label class="col-sm-2 control-label" for="poolStart">DHCP Starting Address</label>
+                                <label class="col-sm-2 control-label" for="poolStart">DHCP Starting Address (i.e. 10.0.0.0)</label>
                                 <div class="col-sm-10">
                                     <input type="text" class="form-control" id="poolStart" placeHolder="DHCP Starting Address"/>
                                 </div>
                             </div>
                             <div class ="form-group" id="ipAddr">
-                                <label class="col-sm-2 control-label" for="poolEnd">DHCP Ending Address</label>
+                                <label class="col-sm-2 control-label" for="poolEnd">DHCP Ending Address (i.e. 10.0.0.255)</label>
                                 <div class="col-sm-10">
                                     <input type="text" class="form-control" id="poolEnd" placeHolder="DHCP Ending Address"/>
                                 </div>

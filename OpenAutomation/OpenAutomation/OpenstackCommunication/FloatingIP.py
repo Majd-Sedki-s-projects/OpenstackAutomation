@@ -17,6 +17,7 @@ class FloatingIP(object):
 
         #Gets only floating ips that are not active
         floatingIP = neutron.list_floatingips(status='DOWN')
+        print(floatingIP)
         newFloatingIP = floatingIP['floatingips'][0]['floating_ip_address']
 
         server.add_floating_ip(address=newFloatingIP)

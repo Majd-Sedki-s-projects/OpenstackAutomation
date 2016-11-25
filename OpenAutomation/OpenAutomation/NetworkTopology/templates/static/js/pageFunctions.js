@@ -5,6 +5,8 @@ var edgeContents = new Array(0);
 var newNodeContents  = new Array(0);
 var newEdgeContents = new Array(0);
 var selectedDevice;
+var selectedAppName;
+var sizeOfApplicationObj;
 var removedNodes = [];
 var deployedNodesAndEdges, removedNodesAndEdges = {};
 var firstSelected = [];
@@ -110,12 +112,12 @@ var sortableListNames = "";
 				}
             });
         }); //End of blur - clicking off editable fields.
-        
+
         // Drag and drop sortable list. Used to select different VMs for each application.
         function addApplications(applicationRequirements){
             sortableListNames = '#appList';
             var appID = parseInt($('input[name=appName]:checked', '.applicationNameForm')[0].id);
-            var selectedAppName = $('input[name=appName]:checked', '.applicationNameForm')[0].value;
+            selectedAppName = $('input[name=appName]:checked', '.applicationNameForm')[0].value;
             var applicationRequirements = applicationRequirements[appID];
             htmlInitData = '<label><ul id="appList" class ="connectedSortable">Applications</label>'
             $('#newAppList').append(htmlInitData);
@@ -141,24 +143,48 @@ var sortableListNames = "";
                 }).disableSelection();
             });
             
-            $("#Select-Application-VMs-Modal").modal();
+            $("#Select-Application-VMs-Modal").modal({backdrop: 'static', keyboard: false});
             destroyModal('Application-Modal');
         }
         
         function saveSelectedAppList(){
-            var dataInList = {};
-            var sortableLists = sortableListNames.replace('#appList,','');
-            sortableLists = sortableLists.split(',');
+            var dataInListObj = {}
+            var sortableLists = sortableListNames.replace('#appList,','')
+            sortableLists = sortableLists.split(',')
+			sizeOfApplicationObj = 0
             for (var i=0; i<sortableLists.length; i++){
                 var sortableListData = $("#newAppList " + sortableLists[i].replace(',',''));
-                var data = sortableListData[0]["children"];
+                var data = sortableListData[0]["children"]
                 for (var j=0; j<data.length;j++){
                     if (j == 0){
-                        dataInList[sortableLists[i]] = [];
+                        dataInListObj[sortableLists[i].replace('#','')] = [];
+						sizeOfApplicationObj++;
                     }
-                    dataInList[sortableLists[i]].push(data[j].textContent);
+                    dataInListObj[sortableLists[i].replace('#','')].push(data[j].textContent);
                 }
             }
+            if (sizeOfApplicationObj > 1){
+                alert("More than one VM not yet supported");
+                resetSortable();
+                return;
+            }
+			var groupName = $("#vmGroupName input:text")[0].value
+			for (var property in dataInListObj){
+				if (dataInListObj.hasOwnProperty(property)){
+					nodes.add({
+                        id: groupName+"-"+property,
+                        type: "vm",
+                        deployed: "false",
+                        label: groupName+"-"+property,
+                        image: "/static/images/vm.png",
+                        shape: "image",
+						group: groupName,
+						application: selectedAppName,
+						numVMs: sizeOfApplicationObj,
+						requirements: toJSON(dataInListObj[property])
+					});
+				}
+			}
             resetSortable();
         }
         
@@ -186,6 +212,8 @@ var sortableListNames = "";
 			$(".newApplicationForm input:text").each(function(){
                 newNetworkData.push($(this).val());
             });
+			var selectedOS = $('input[name=chosenOS]:checked', '#newApplicationForm')[0].id
+			newNetworkData.push(selectedOS)
             var submit = true;
             var networkName = $('#applicationName');
             var networkReqs = $('#applicationRequirements');
@@ -198,6 +226,7 @@ var sortableListNames = "";
                 networkReqs.closest('.form-group').removeClass('has-success').addClass('has-error');
                 submit = false;
             }
+			
             if(submit){
                 $.ajax({
                     csrfmiddlewaretoken: '{{ csrf_token }}',
@@ -206,9 +235,8 @@ var sortableListNames = "";
                     dataType: 'json',
                     data: "[{'action': 'add_application'}," + "[{'application_info':" + "'" + JSON.stringify(newNetworkData) + "'" + "}]]"
                 });
-                destroyModal('newApplicationModal');
             }
-            
+            destroyModal('newApplicationModal');
         }
         
         function removeApplication(){
@@ -377,6 +405,7 @@ var sortableListNames = "";
                 alert(err);
             }
         }
+        
         function removeNode() {
             try {
                 var nodeToRemove = document.getElementById('node-id').value
@@ -395,40 +424,81 @@ var sortableListNames = "";
                 alert(err);
             }
         }
+        
+        /*$(document).ready(function(){
+            $('[data-toggle=confirmation]').confirmation({
+                rootSelector: '[data-toggle=confirmation]',
+                singleton: true,
+                onConfirm: function(event, element){ element.trigger('confirm');}
+            });
+        });
+        
+        $('#submitJson').confirmation({
+            onConfirm: function(event){alert("Confirmed!");}
+        });
+        
+        $('#submitJson').on('confirm', function(){
+            deploy();
+            
+        });*/
         function deploy(){
             deployedNodesAndEdges = {
                 nodes: JSON.stringify(nodes.get(),null,4),
                 edges: JSON.stringify(edges.get(),null,4)  
             }
-                $.ajax({
-                    csrfmiddlewaretoken: '{{ csrf_token }}',
-                    method: 'POST',
-                    url: '/Home/NetworkTopology/',
-                    dataType: 'json',
-                    data: "[{'type': 'deploy'}," + deployedNodesAndEdges["nodes"] + "," + deployedNodesAndEdges["edges"] + "]",
-                    success: function(data){
-                        var deployed_status = data;
+            if ((nodes.get().length) == 0 || (edges.get().length == 0)){
+                $.alert("There must be nodes and edges in the topology before deploying to OpenStack.");
+                return;
+            }
+            $.confirm({
+                title: 'Confirm Deployment',
+                content: 'Topology will be deployed on OpenStack',
+                closeIcon: true,
+                buttons: {
+                    confirm: {
+                        btnClass: 'btn-green',
+                        action: function () {
+                            $.ajax({
+                                csrfmiddlewaretoken: '{{ csrf_token }}',
+                                method: 'POST',
+                                url: '/Home/NetworkTopology/',
+                                dataType: 'json',
+                                data: "[{'type': 'deploy'}," + deployedNodesAndEdges["nodes"] + "," + deployedNodesAndEdges["edges"] + "]",
+                                success: function(data){
+                                    var deployed_status = data;
+                                }
+                            });
+                        },
+                    },
+                    cancel: {
+                        btnClass: 'btn-red',
+                        action: function () {
+                            $.alert('Canceled Deployment.');
+                        }
                     }
-                });
-                for (var property in nodes._data){
-                    nodes._data[property]["deployed"] = "true";
                 }
+            });
         }
         
-        function updateDeployedStatus(){
-            
-        }
         function saveTopology(){
             topology = {
                 nodes: JSON.stringify(nodes.get(), null, 4),
                 edges: JSON.stringify(edges.get(), null, 4)
             }
+            if ((nodes.get().length) == 0 || (edges.get().length == 0)){
+                $.alert("There must be nodes and edges in the topology before saving it.");
+                return;
+            }
+            var newTopologyName = [];
+			$(".newTopologyForm input:text").each(function(){
+                newTopologyName.push($(this).val());
+            });
             $.ajax({
                 csrfmiddlewaretoken: '{{ csrf_token }}',
                 method: 'POST',
                 url: '/Home/NetworkTopology/',
                 dataType: 'json',
-                data: "[{'action': 'save_template','topology_name': " + "'" + requestTopologyName("Please enter a name to save this topology as") + "'}," + topology["nodes"] + "," + topology["edges"] + "]"
+                data: "[{'action': 'save_template','topology_name': " + "'" + newTopologyName[0] + "'}," + topology["nodes"] + "," + topology["edges"] + "]"
             })
         }
         
@@ -438,18 +508,34 @@ var sortableListNames = "";
             var returnedEdges = [];
             var e = document.getElementById("top_name_retrieve");
 			var topology_name = e.options[e.selectedIndex].text;
-			$.ajax({
-                csrfmiddlewaretoken: '{{ csrf_token }}',
-                method: 'POST',
-                url: '/Home/NetworkTopology/',
-                dataType: 'json',
-                data: "[{'action': 'return_topology'}," + "[{'topology_name':" + "'" + topology_name + "'" + "}]]",
-            
-                success: function(data){
-                    var returnedTopology = data;
-                    returnedNodes = returnedTopology[0];
-                    returnedEdges = returnedTopology[1];
-                    addTopology(returnedNodes, returnedEdges);
+            $.confirm({
+                title: 'Retrieve Topology',
+                content: 'The topology named' + topology_name + ' will be retrieved and placed into your Network.',
+                closeIcon: true,
+                buttons: {
+                    confirm: {
+                        btnClass: 'btn-green',
+                        action: function () {
+                            $.ajax({
+                                csrfmiddlewaretoken: '{{ csrf_token }}',
+                                method: 'POST',
+                                url: '/Home/NetworkTopology/',
+                                dataType: 'json',
+                                data: "[{'action': 'return_topology'}," + "[{'topology_name':" + "'" + topology_name + "'" + "}]]",
+                            
+                                success: function(data){
+                                    var returnedTopology = data;
+                                    returnedNodes = returnedTopology[0];
+                                    returnedEdges = returnedTopology[1];
+                                    addTopology(returnedNodes, returnedEdges);
+                                }
+                            });
+                        },
+                    },
+                    cancel: {
+                        btnClass: 'btn-red',
+                        action: function () {return;}
+                    }
                 }
             });
         }
@@ -457,39 +543,31 @@ var sortableListNames = "";
 		function deleteTemplate(){
 			var e = document.getElementById("top_name_retrieve");
 			var topology_name = e.options[e.selectedIndex].text;
-			$.ajax({
-                csrfmiddlewaretoken: '{{ csrf_token }}',
-                method: 'POST',
-                url: '/Home/NetworkTopology/',
-                dataType: 'json',
-                data: "[{'action': 'delete_template'}," + "[{'topology_name':" + "'" + topology_name + "'" + "}]]",
-			});
+            $.confirm({
+                title: 'Delete Topology',
+                content: 'The topology named' + topology_name + ' will be permanently deleted from the database.',
+                closeIcon: true,
+                buttons: {
+                    confirm: {
+                        btnClass: 'btn-green',
+                        action: function () {
+                            $.ajax({
+                                csrfmiddlewaretoken: '{{ csrf_token }}',
+                                method: 'POST',
+                                url: '/Home/NetworkTopology/',
+                                dataType: 'json',
+                                data: "[{'action': 'delete_template'}," + "[{'topology_name':" + "'" + topology_name + "'" + "}]]",
+                            });
+                        },
+                    },
+                    cancel: {
+                        btnClass: 'btn-red',
+                        action: function () {return;}
+                    }
+                }
+            });
+
 		}
-		
-        function requestTopologyName(messageToUser){
-            var input = prompt(messageToUser,"");
-            return input;
-        }
-
-        function requestSubnetForNetwork(messageToUser){
-            var subnet = prompt(messageToUser,""); //Should be only allowed to input ip address block here in the future
-            return subnet;
-        }
-
-        function requestSubnetName(messageToUser){
-            var subnetName = prompt(messageToUser,"");
-            return subnetName;
-        }
-
-        function requestSubnetRangeStart(messageToUser){
-            var subnetRangeStart = prompt(messageToUser,"");
-            return subnetRangeStart;
-        }
-
-        function requestSubnetRangeEnd(messageToUser){
-            var subnetRangeEnd = prompt(messageToUser,"");
-            return subnetRangeEnd;
-        }
         
         function addTopology(returnedNodes, returnedEdges){
             if (returnedNodes.length > 0){
@@ -537,6 +615,8 @@ var sortableListNames = "";
                 alert(err);
             }
         }
+        
+        
         function removeEdge() {
             try {
                 edges.remove({id: document.getElementById('edge-id').value});
@@ -545,6 +625,8 @@ var sortableListNames = "";
                 alert(err);
             }
         }
+        
+        
         function draw() {
             // create an array with nodes
             nodes = new vis.DataSet();
@@ -575,51 +657,50 @@ var sortableListNames = "";
             // Create the network.
             network = new vis.Network(container, data, options);
             network.setOptions(options);
-
-                    network.on('selectNode', function(p) {
-                        // If no nodes have been selected yet.
-                        if(firstSelected.length == 0){
-                            firstSelected = network.getSelectedNodes();
-                        // If one node has already been selected.
-                        }else{
-                            secondSelected = network.getSelectedNodes();
-                        }
-                        if(firstSelected.length == 1 && secondSelected.length == 1){
-                                var linkCreated = false;
-                                upperLoop:
+            network.on('selectNode', function(p) {
+                // If no nodes have been selected yet.
+                if(firstSelected.length == 0){
+                    firstSelected = network.getSelectedNodes();
+                // If one node has already been selected.
+                }else{
+                    secondSelected = network.getSelectedNodes();
+                }
+                if(firstSelected.length == 1 && secondSelected.length == 1){
+                        var linkCreated = false;
+                        upperLoop:
+                        for (var property in nodes._data){
+                            // If the first node selected is a network and the second is not a network.
+                            if (nodes._data[property]["id"] == firstSelected[0] && nodes._data[property]["type"] == "network"){
                                 for (var property in nodes._data){
-                                    // If the first node selected is a network and the second is not a network.
-                                    if (nodes._data[property]["id"] == firstSelected[0] && nodes._data[property]["type"] == "network"){
-                                        for (var property in nodes._data){
-                                            if(nodes._data[property]["id"] == secondSelected[0] && nodes._data[property]["type"] != "network"){
-                                                var nodeID = firstSelected + "-" + secondSelected;
-                                                addEdge(nodeID,firstSelected[0],secondSelected[0]);
-                                                firstSelected = [];
-                                                secondSelected = [];
-                                                linkCreated = true;
-                                                break upperLoop;
-                                            }
-                                        }
-                                    // If the first node selected is not a network and the second node selected is a network.
-                                    }else if (nodes._data[property]["id"] == firstSelected[0] && nodes._data[property]["type"] != "network"){
-                                        for (var property in nodes._data){
-                                            if(nodes._data[property]["id"] == secondSelected[0] && nodes._data[property]["type"] == "network"){
-                                                var nodeID = firstSelected + "-" + secondSelected;
-                                                addEdge(nodeID,firstSelected[0],secondSelected[0]);
-                                                firstSelected = [];
-                                                secondSelected = [];
-                                                linkCreated = true;
-                                                break upperLoop;
-                                            }
-                                        }
+                                    if(nodes._data[property]["id"] == secondSelected[0] && nodes._data[property]["type"] != "network"){
+                                        var nodeID = firstSelected + "-" + secondSelected;
+                                        addEdge(nodeID,firstSelected[0],secondSelected[0]);
+                                        firstSelected = [];
+                                        secondSelected = [];
+                                        linkCreated = true;
+                                        break upperLoop;
                                     }
                                 }
-                            // If the link was not created, empty the selected arrays and alert the user that an error was made.
-                            if (!linkCreated){
-                                firstSelected = [];
-                                secondSelected = [];
-                                alert("Only one of the two nodes you are connecting should be a network.");
+                            // If the first node selected is not a network and the second node selected is a network.
+                            }else if (nodes._data[property]["id"] == firstSelected[0] && nodes._data[property]["type"] != "network"){
+                                for (var property in nodes._data){
+                                    if(nodes._data[property]["id"] == secondSelected[0] && nodes._data[property]["type"] == "network"){
+                                        var nodeID = firstSelected + "-" + secondSelected;
+                                        addEdge(nodeID,firstSelected[0],secondSelected[0]);
+                                        firstSelected = [];
+                                        secondSelected = [];
+                                        linkCreated = true;
+                                        break upperLoop;
+                                    }
+                                }
                             }
-                        };
-                    });
+                        }
+                    // If the link was not created, empty the selected arrays and alert the user that an error was made.
+                    if (!linkCreated){
+                        firstSelected = [];
+                        secondSelected = [];
+                        alert("Only one of the two nodes you are connecting should be a network.");
+                    }
+                };
+            });
         }

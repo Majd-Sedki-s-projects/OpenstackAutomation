@@ -16,6 +16,7 @@ class Topology(models.Model):
 class NetworkApplications(models.Model):
     application_name = models.CharField(max_length=25, default="NO_APP_NAME_PROVIDED")
     application_requirements = JSONField()
+    application_os = models.CharField(max_length=25, default="NO_OS_SPECIFIED")
 
     class Meta:
         app_label = "NetworkTopology"
