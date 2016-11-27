@@ -24,6 +24,13 @@ git clone https://github.com/Steven-N/ansible-examples.git /tmp/app 2>&1
 
 cd /tmp/app/lamp_simple/
 
+rm hosts
+touch hosts
+echo "Creating hosts file"
+echo "[dbservers]"\nIP_REPLACEMENT ansible_connection=ssh  ansible_become=true ansible_become_method=su ansible_become_exe="sudo su -" ansible_ssh_user=openadmin ansible_ssh_pass=telecoms144" >> hosts
+echo "[webservers]\nlocalhost ansible_connection=local ansible_become=true ansible_become_method=su ansible_become_exe="sudo su -" >> hosts
+
+
 echo "Starting playbook"
 ansible-playbook -i hosts site.yml 2>&1
 

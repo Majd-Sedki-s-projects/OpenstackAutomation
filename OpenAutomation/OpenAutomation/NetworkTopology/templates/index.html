@@ -155,10 +155,11 @@
                                 </div>
                             </div>
 							<div class="form-group" id="osAllowed">
-								<label>Select one or both OS options to use with this application.</label>
+								<label>Select the OS to use with this application.</label>
 								<ul>
-									<li><label><input type="radio" id="Centos6" value="Centos6" name="chosenOS">Centos6</label></li>
-									<li><label><input type="radio" id="Ubuntu" value="Ubuntu" name="chosenOS">Ubuntu</label></li>
+                                    {% for image in image_list %}
+                                        <li><label><input type="radio" id="{{image}}" value="{{image}}" name="chosenOS">{{image}}</label></li>
+                                    {% endfor %}
 								</ul>
 							</div>
 						</form>

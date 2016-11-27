@@ -163,11 +163,11 @@ var sortableListNames = "";
                     dataInListObj[sortableLists[i].replace('#','')].push(data[j].textContent);
                 }
             }
-            if (sizeOfApplicationObj > 1){
+            /*if (sizeOfApplicationObj > 1){
                 alert("More than one VM not yet supported");
                 resetSortable();
                 return;
-            }
+            }*/
 			var groupName = $("#vmGroupName input:text")[0].value
 			for (var property in dataInListObj){
 				if (dataInListObj.hasOwnProperty(property)){
@@ -425,22 +425,6 @@ var sortableListNames = "";
             }
         }
         
-        /*$(document).ready(function(){
-            $('[data-toggle=confirmation]').confirmation({
-                rootSelector: '[data-toggle=confirmation]',
-                singleton: true,
-                onConfirm: function(event, element){ element.trigger('confirm');}
-            });
-        });
-        
-        $('#submitJson').confirmation({
-            onConfirm: function(event){alert("Confirmed!");}
-        });
-        
-        $('#submitJson').on('confirm', function(){
-            deploy();
-            
-        });*/
         function deploy(){
             deployedNodesAndEdges = {
                 nodes: JSON.stringify(nodes.get(),null,4),

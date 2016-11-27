@@ -7,6 +7,7 @@ from ..OpenstackCommunication.CreateRouter import CreateRouter
 from ..OpenstackCommunication.CreateNetwork import CreateNetwork
 from ..OpenstackCommunication.FloatingIP import FloatingIP
 from ..OpenstackCommunication.ParseEdges import ParseEdges
+from ..OpenstackCommunication.GlanceCommunication import GlanceCommunication
 from ..OpenstackCommunication.Utils import Utils
 from ..OpenstackCommunication.CreateSubnet import CreateSubnet
 from ast import literal_eval
@@ -14,6 +15,7 @@ from OpenAutomation.NetworkTopology.models import Topology, NetworkApplications
 from OpenAutomation.NetworkTopology.forms import ConfigurationForm
 from json import dumps, loads
 import os
+from fileinput import FileInput
 import time
 import json
 
@@ -31,21 +33,7 @@ def admin(request):
 def contact(request):
     return render(request, "contact.html")
 
-'''
-@csrf_exempt
-def upload_file(request):
-    if request.method == 'POST':
-        print("GOT HERE")
-        form = ConfigurationForm(request.POST, request.FILES)
-        print(request.FILES)
-        # print(request.FILES)
-        print("ERROR " + str(form.errors))
-        if form.is_valid():
-            print("Success")
-        elif not form.is_valid():
-            print("Failed")
-    return render(request, 'index.html')
-'''
+
 @csrf_exempt
 def network_topology(request):
     # Initial Authentication with Openstack
@@ -53,6 +41,8 @@ def network_topology(request):
                         proj_name="admin", user_domain="default", project_domain="default")
     session = auth.start_auth()
     utilities = Utils(session=session)
+    glance = GlanceCommunication(session)
+    completed_groups = []
     if request.is_ajax():
         request_data = request.body
         data = literal_eval(str(request_data.decode()))
@@ -66,128 +56,142 @@ def network_topology(request):
                 network_exists = False
                 for device_id in node_info:
                     if device_id.get("deployed") == "false":
-                        if 'vm' in device_id.get("type"):
+                        if device_id.get("type") == 'vm':
                             print(device_id.get("label"))
                             print(device_id.get("requirements"))
                             num_vms = device_id.get("numVMs")
                             if num_vms == 1:
                                 app_name = device_id.get("application")
-                                if app_name == "Wordpress":
-                                    cloud_init = open(PROJECT_PATH + '/CloudInit/'+app_name+'.txt')
-                                    edge_parser = ParseEdges(edge_info)
-                                    network_name = edge_parser.parse_edges(node_name=device_id.get("label"))
-                                    network_info = CreateNetwork(session)
+                                os_name = NetworkApplications.objects.values('application_os').filter(
+                                    application_name=app_name)[0]["application_os"]
+                                """"
+                                cloud_init = open(PROJECT_PATH + '/CloudInit/' + app_name + '.txt')
+                                edge_parser = ParseEdges(edge_info)
+                                network_name = edge_parser.parse_edges(node_name=device_id.get("label"))
+                                network_info = CreateNetwork(session)
+                                network_id, network_exists = network_info.get_network_id(name=network_name)
+                                print("network_exists: " + str(network_exists))
+                                if network_exists:
+                                    nova, status = new_instance.start_instance(server_name=device_id.get("label"),
+                                                                               image=os_name, size="m1.small",
+                                                                               userdata=cloud_init,
+                                                                               network_id=network_id)
+                                    if status:
+                                        deployment_status["deployed_successfully"].append("true")
+                                        deployment_status["device_name"].append(device_id.get("label"))
+                                    elif not status:
+                                        deployment_status["deployed_successfully"].append("false")
+                                        deployment_status["device_name"].append(device_id.get("label"))
+                                elif not network_exists:
+                                    body = {'name': network_name, 'admin_state_up': True}
+                                    network_info.create_network(name=network_name, body=body)
                                     network_id, network_exists = network_info.get_network_id(name=network_name)
-                                    print("network_exists: " + str(network_exists))
-                                    if network_exists:
-                                        nova, status = new_instance.start_instance(server_name=device_id.get("label"),
-                                                                                   image="Centos6", size="m1.small",
-                                                                                   userdata=cloud_init,
-                                                                                   network_id=network_id)
-                                        if status:
-                                            deployment_status["deployed_successfully"].append("true")
-                                            deployment_status["device_name"].append(device_id.get("label"))
-                                        elif not status:
-                                            deployment_status["deployed_successfully"].append("false")
-                                            deployment_status["device_name"].append(device_id.get("label"))
-                                    elif not network_exists:
-                                        body = {'name': network_name, 'admin_state_up': True}
-                                        network_info.create_network(name=network_name, body=body)
-                                        network_id, network_exists = network_info.get_network_id(name=network_name)
-                                        print("network_id: " + network_id)
-                                        nova, status = new_instance.start_instance(server_name=device_id.get("label"),
-                                                                                   image="Centos6", size="m1.small",
-                                                                                   userdata=cloud_init,
-                                                                                   network_id=network_id)
-                                        if status:
-                                            deployment_status["deployed_successfully"].append("true")
-                                            deployment_status["device_name"].append(device_id.get("label"))
-                                        elif not status:
-                                            deployment_status["deployed_successfully"].append("false")
-                                            deployment_status["device_name"].append(device_id.get("label"))
-                                    time.sleep(10)  # Wait to allow server to complete build (Can't assign FIP until built)
-                                    new_floatingip = FloatingIP(session)
-                                    server = new_floatingip.getServer(name=device_id.get("label"))
-                                    new_floatingip.assignFloatingIP(server)
-                                elif app_name == "Apache":
-                                    print(device_id.get("label"))
-                                    cloud_init = open(PROJECT_PATH + '/CloudInit/'+app_name+'.txt')
-                                    edge_parser = ParseEdges(edge_info)
-                                    network_name = edge_parser.parse_edges(node_name=device_id.get("label"))
-                                    network_info = CreateNetwork(session)
-                                    network_id, network_exists = network_info.get_network_id(name=network_name)
-                                    print("network_exists: " + str(network_exists))
-                                    if network_exists:
-                                        nova, status = new_instance.start_instance(server_name=device_id.get("label"),
-                                                                                   image="Ubuntu 16.04 LTS",
-                                                                                   size="m1.small",
-                                                                                   userdata=cloud_init,
-                                                                                   network_id=network_id)
-                                        if status:
-                                            deployment_status["deployed_successfully"].append("true")
-                                            deployment_status["device_name"].append(device_id.get("label"))
-                                        elif not status:
-                                            deployment_status["deployed_successfully"].append("false")
-                                            deployment_status["device_name"].append(device_id.get("label"))
-                                    elif not network_exists:
-                                        body = {'name': network_name, 'admin_state_up': True}
-                                        network_info.create_network(name=network_name, body=body)
-                                        network_id, network_exists = network_info.get_network_id(name=network_name)
-                                        print("network_id: " + network_id)
-                                        nova, status = new_instance.start_instance(server_name=device_id.get("label"),
-                                                                                   image="Ubuntu 16.04 LTS",
-                                                                                   size="m1.small",
-                                                                                   userdata=cloud_init,
-                                                                                   network_id=network_id)
-                                        if status:
-                                            deployment_status["deployed_successfully"].append("true")
-                                            deployment_status["device_name"].append(device_id.get("label"))
-                                        elif not status:
-                                            deployment_status["deployed_successfully"].append("false")
-                                            deployment_status["device_name"].append(device_id.get("label"))
-                                #time.sleep(10)  # Wait to allow server to complete build (Can't assign FIP until built)
+                                    print("network_id: " + network_id)
+                                    nova, status = new_instance.start_instance(server_name=device_id.get("label"),
+                                                                               image=os_name, size="m1.small",
+                                                                               userdata=cloud_init,
+                                                                               network_id=network_id)
+                                    if status:
+                                        deployment_status["deployed_successfully"].append("true")
+                                        deployment_status["device_name"].append(device_id.get("label"))
+                                    elif not status:
+                                        deployment_status["deployed_successfully"].append("false")
+                                        deployment_status["device_name"].append(device_id.get("label"))
                                 new_floatingip = FloatingIP(session)
                                 server = new_floatingip.getServer(name=device_id.get("label"))
                                 new_floatingip.assignFloatingIP(server)
+                                """
                             elif num_vms > 1:
-                                pass
-                            #print(edge_info)
-                            '''
-                            edge_parser = ParseEdges(edge_info)
-                            network_name = edge_parser.parse_edges(node_name=device_id.get("label"))
-                            network_info = CreateNetwork(session)
-                            network_id, network_exists = network_info.get_network_id(name=network_name)
-                            print("network_exists: " + str(network_exists))
-                            if network_exists:
-                                print("Creating Instance")
-                                print("Network is: " + network_id)
-                                nova, status = new_instance.start_instance(server_name=device_id.get("label"),
-                                                                           image="cirros", size="m1.tiny", userdata="",
-                                                                           network_id=network_id)
-                                if status:
-                                    print("Instance Created")
-                                    deployment_status["deployed_successfully"].append("true")
-                                    deployment_status["device_name"].append(device_id.get("label"))
-                                elif not status:
-                                    print("Instance failed")
-                                    deployment_status["deployed_successfully"].append("false")
-                                    deployment_status["device_name"].append(device_id.get("label"))
-                            elif not network_exists:
-                                body = {'name': network_name, 'admin_state_up': True}
-                                network_info.create_network(name=network_name, body=body)
+                                started_instances = []
+                                group_data = utilities.find_group(node_info, device_id.get("group"))
+                                ansible_server = group_data.pop(0)
+                                print("GROUP DATA " + str(len(group_data)))
+                                # Start all but one instance
+                                for group_nodes in group_data:
+                                    app_name = group_nodes.get("application")
+                                    os_name = NetworkApplications.objects.values('application_os').filter(
+                                        application_name=app_name)[0]["application_os"]
+                                    edge_parser = ParseEdges(edge_info)
+                                    network_name = edge_parser.parse_edges(node_name=group_nodes.get("label"))
+                                    network_info = CreateNetwork(session)
+                                    network_id, network_exists = network_info.get_network_id(name=network_name)
+                                    print("network_exists: " + str(network_exists))
+                                    if network_exists:
+                                        nova, status = new_instance.start_instance(server_name=group_nodes.get("label"),
+                                                                                   image=os_name, size="m1.small",
+                                                                                   userdata="", network_id=network_id)
+                                        if status:
+                                            deployment_status["deployed_successfully"].append("true")
+                                            deployment_status["device_name"].append(group_nodes.get("label"))
+                                        elif not status:
+                                            deployment_status["deployed_successfully"].append("false")
+                                            deployment_status["device_name"].append(group_nodes.get("label"))
+                                    elif not network_exists:
+                                        body = {'name': network_name, 'admin_state_up': True}
+                                        network_info.create_network(name=network_name, body=body)
+                                        network_id, network_exists = network_info.get_network_id(name=network_name)
+                                        print("network_id: " + network_id)
+                                        nova, status = new_instance.start_instance(server_name=group_nodes.get("label"),
+                                                                                   image=os_name, size="m1.small",
+                                                                                   userdata="", network_id=network_id)
+                                        if status:
+                                            deployment_status["deployed_successfully"].append("true")
+                                            deployment_status["device_name"].append(group_nodes.get("label"))
+                                        elif not status:
+                                            deployment_status["deployed_successfully"].append("false")
+                                            deployment_status["device_name"].append(group_nodes.get("label"))
+                                    started_instances.append(group_nodes.get("label"))
+                                    new_floatingip = FloatingIP(session)
+                                    server = new_floatingip.getServer(name=group_nodes.get("label"))
+                                    new_floatingip.assignFloatingIP(server)
+                                server_ip = new_instance.get_server_ip(started_instances)
+                                print("SERVER IP " + str(server_ip))
+
+                                # BUILD FINAL SERVER - SEND UPDATED CONFIG TO IT.
+                                final_app_name = ansible_server.get("application")
+                                final_os_name = NetworkApplications.objects.values('application_os').filter(
+                                        application_name=final_app_name)[0]["application_os"]
+                                cloud_init = open(PROJECT_PATH + '/CloudInit/' + final_app_name + '.txt')
+                                count = 0
+                                with FileInput(cloud_init, inplace=True, backup='.bak') as file:
+                                    for ip in server_ip:
+                                        for line in file:
+                                            count += 1
+                                            print(line.replace('IP_REPLACEMENT_IP' + str(count), ip), end='')
+                                edge_parser = ParseEdges(edge_info)
+                                network_name = edge_parser.parse_edges(node_name=ansible_server.get("label"))
+                                network_info = CreateNetwork(session)
                                 network_id, network_exists = network_info.get_network_id(name=network_name)
-                                print("network_id: " + network_id)
-                                nova, status = new_instance.start_instance(server_name=device_id.get("label"),
-                                                                           image="cirros", size="m1.small", userdata="",
-                                                                           network_id=network_id)
-                                if status:
-                                    deployment_status["deployed_successfully"].append("true")
-                                    deployment_status["device_name"].append(device_id.get("label"))
-                                elif status:
-                                    deployment_status["deployed_successfully"].append("false")
-                                    deployment_status["device_name"].append(device_id.get("label"))
-                            '''
-                        elif 'router' in device_id.get("type"):
+                                print("network_exists: " + str(network_exists))
+                                if network_exists:
+                                    nova, status = new_instance.start_instance(server_name=group_nodes.get("label"),
+                                                                               image=final_os_name, size="m1.small",
+                                                                               userdata=cloud_init, network_id=network_id)
+                                    if status:
+                                        deployment_status["deployed_successfully"].append("true")
+                                        deployment_status["device_name"].append(group_nodes.get("label"))
+                                    elif not status:
+                                        deployment_status["deployed_successfully"].append("false")
+                                        deployment_status["device_name"].append(group_nodes.get("label"))
+                                elif not network_exists:
+                                    body = {'name': network_name, 'admin_state_up': True}
+                                    network_info.create_network(name=network_name, body=body)
+                                    network_id, network_exists = network_info.get_network_id(name=network_name)
+                                    print("network_id: " + network_id)
+                                    nova, status = new_instance.start_instance(server_name=group_nodes.get("label"),
+                                                                               image=final_os_name, size="m1.small",
+                                                                               userdata=cloud_init, network_id=network_id)
+                                    if status:
+                                        deployment_status["deployed_successfully"].append("true")
+                                        deployment_status["device_name"].append(group_nodes.get("label"))
+                                    elif not status:
+                                        deployment_status["deployed_successfully"].append("false")
+                                        deployment_status["device_name"].append(group_nodes.get("label"))
+                                started_instances.append(group_nodes.get("label"))
+                                new_floatingip = FloatingIP(session)
+                                server = new_floatingip.getServer(name=group_nodes.get("label"))
+                                new_floatingip.assignFloatingIP(server)
+                        elif device_id.get("type") == 'router':
                             print(device_id.get("label"))
                             new_router = CreateRouter(session)
                             ext_net = {"network_id": "fb1879a3-6ec5-4593-8b51-4de72d872f4e", "enable_snat": True}
@@ -195,80 +199,6 @@ def network_topology(request):
                                     'external_gateway_info': ext_net
                                     }
                             neutron = new_router.create_router(body)
-                        '''
-                        elif 'apache' in device_id.get("type"):
-                            print(device_id.get("label"))
-                            cloud_init = open(PROJECT_PATH + '/CloudInit/apache_cloudinit.txt')
-                            edge_parser = ParseEdges(edge_info)
-                            network_name = edge_parser.parse_edges(node_name=device_id.get("label"))
-                            network_info = CreateNetwork(session)
-                            network_id, network_exists = network_info.get_network_id(name=network_name)
-                            print("network_exists: " + str(network_exists))
-                            if network_exists:
-                                nova, status = new_instance.start_instance(server_name=device_id.get("label"),
-                                                                           image="Ubuntu 16.04 LTS", size="m1.small",
-                                                                           userdata=cloud_init, network_id=network_id)
-                                if status:
-                                    deployment_status["deployed_successfully"].append("true")
-                                    deployment_status["device_name"].append(device_id.get("label"))
-                                elif not status:
-                                    deployment_status["deployed_successfully"].append("false")
-                                    deployment_status["device_name"].append(device_id.get("label"))
-                            elif not network_exists:
-                                body = {'name': network_name, 'admin_state_up': True}
-                                network_info.create_network(name=network_name, body=body)
-                                network_id, network_exists = network_info.get_network_id(name=network_name)
-                                print("network_id: " + network_id)
-                                nova, status = new_instance.start_instance(server_name=device_id.get("label"),
-                                                                           image="Ubuntu 16.04 LTS", size="m1.small",
-                                                                           userdata=cloud_init, network_id=network_id)
-                                if status:
-                                    deployment_status["deployed_successfully"].append("true")
-                                    deployment_status["device_name"].append(device_id.get("label"))
-                                elif not status:
-                                    deployment_status["deployed_successfully"].append("false")
-                                    deployment_status["device_name"].append(device_id.get("label"))
-                            time.sleep(10)  # Wait to allow server to complete build (Can't assign FIP until built)
-                            new_floatingip = FloatingIP(session)
-                            server = new_floatingip.getServer(name=device_id.get("label"))
-                            new_floatingip.assignFloatingIP(server)
-                        elif 'wordpress' in device_id.get("type"):
-                            print(device_id.get("label"))
-                            print("project path is: " + PROJECT_PATH)
-                            cloud_init = open(PROJECT_PATH + '/CloudInit/wordpress_centos6_cloudinit.txt')
-                            edge_parser = ParseEdges(edge_info)
-                            network_name = edge_parser.parse_edges(node_name=device_id.get("label"))
-                            network_info = CreateNetwork(session)
-                            network_id, network_exists = network_info.get_network_id(name=network_name)
-                            print("network_exists: " + str(network_exists))
-                            if network_exists:
-                                nova, status = new_instance.start_instance(server_name=device_id.get("label"),
-                                                                           image="Centos6", size="m1.small",
-                                                                           userdata=cloud_init, network_id=network_id)
-                                if status:
-                                    deployment_status["deployed_successfully"].append("true")
-                                    deployment_status["device_name"].append(device_id.get("label"))
-                                elif not status:
-                                    deployment_status["deployed_successfully"].append("false")
-                                    deployment_status["device_name"].append(device_id.get("label"))
-                            elif not network_exists:
-                                body = {'name': network_name, 'admin_state_up': True}
-                                network_info.create_network(name=network_name, body=body)
-                                network_id, network_exists = network_info.get_network_id(name=network_name)
-                                print("network_id: " + network_id)
-                                nova, status = new_instance.start_instance(server_name=device_id.get("label"),
-                                                                           image="Centos6", size="m1.small",
-                                                                           userdata=cloud_init, network_id=network_id)
-                                if status:
-                                    deployment_status["deployed_successfully"].append("true")
-                                    deployment_status["device_name"].append(device_id.get("label"))
-                                elif not status:
-                                    deployment_status["deployed_successfully"].append("false")
-                                    deployment_status["device_name"].append(device_id.get("label"))
-                            time.sleep(10)  # Wait to allow server to complete build (Can't assign FIP until built)
-                            new_floatingip = FloatingIP(session)
-                            server = new_floatingip.getServer(name=device_id.get("label"))
-                            new_floatingip.assignFloatingIP(server)
                         elif 'network' in device_id.get("type") and not network_exists:
                             pass
                             # Currently causes issues. Don't uncomment for now.
@@ -296,7 +226,6 @@ def network_topology(request):
 
                         else:
                             print("")
-                        '''
                     else:
                         print("Already deployed: " + device_id.get("label"))
                 return JsonResponse(deployment_status, safe=False)
@@ -344,6 +273,7 @@ def network_topology(request):
                 print(application_name)
                 NetworkApplications.objects.filter(application_name=application_name).delete()
                 print("APPLICATION DELETED")
+
     # Get a list of topology names from MySQL DB.
     topology_name = list(Topology.objects.values_list('topology_name', flat=True))
     # Get a list of networks
@@ -351,8 +281,10 @@ def network_topology(request):
     # Get a list of applications from the database.
     application_names = list(NetworkApplications.objects.values_list('application_name', flat=True))
     application_reqs = list(NetworkApplications.objects.values_list('application_requirements', flat=True))
-    application_os = list(NetworkApplications.objects.values_list('application_os', flat=True))
+    # application_os = list(NetworkApplications.objects.values_list('application_os', flat=True))
     form = ConfigurationForm()
+    # Get image list
+    image_list = glance.get_image_list()
     return render(request, "index.html", {'topology_name': topology_name, 'network_list': network_list,
                                           'application_names': application_names, 'application_reqs': application_reqs,
-                                          'application_os': application_os, 'form': form})
+                                          'image_list': image_list, 'form': form})
