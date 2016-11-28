@@ -10,6 +10,11 @@ class CreateNetwork(object):
         neutron.create_network({'network': body})
         return neutron
 
+    def add_gw_interface(self, body):
+        neutron = neutron_client.Client(session=self.session)
+        neutron.add_interface_router({})
+        return neutron
+
     def delete_network_byName(self, name):
         neutron = neutron_client.Client(session=self.session)
         networks = neutron.list_networks(name=name)

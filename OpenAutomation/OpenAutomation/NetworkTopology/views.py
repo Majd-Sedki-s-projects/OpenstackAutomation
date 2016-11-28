@@ -37,7 +37,7 @@ def contact(request):
 @csrf_exempt
 def network_topology(request):
     # Initial Authentication with Openstack
-    auth = Authenticate(auth="http://144.217.53.20:5000/v3", user="admin", passwd="fdc014394ad84458",
+    auth = Authenticate(auth="http://10.14.192.248:5000/v3", user="admin", passwd="24df4e1f03fe4932",
                         proj_name="admin", user_domain="default", project_domain="default")
     session = auth.start_auth()
     utilities = Utils(session=session)
@@ -192,38 +192,47 @@ def network_topology(request):
                                 server = new_floatingip.getServer(name=group_nodes.get("label"))
                                 new_floatingip.assignFloatingIP(server)
                         elif device_id.get("type") == 'router':
-                            print(device_id.get("label"))
-                            new_router = CreateRouter(session)
-                            ext_net = {"network_id": "fb1879a3-6ec5-4593-8b51-4de72d872f4e", "enable_snat": True}
-                            body = {'name': device_id.get("label"),
-                                    'external_gateway_info': ext_net
-                                    }
-                            neutron = new_router.create_router(body)
-                        elif 'network' in device_id.get("type") and not network_exists:
-                            pass
+
+                            if device_id.get("label") not in utilities.get_router_list():
+                                print(device_id.get("label"))
+                                new_router = CreateRouter(session)
+                                ext_net = {"network_id": "f2e9969b-941c-42a9-bd6f-0081b533f25b", "enable_snat": True}
+                                body = {'name': device_id.get("label"),
+                                        'external_gateway_info': ext_net
+                                        }
+                                neutron = new_router.create_router(body)
+                            else:
+                                print("Router exists. Moving on.")
+                        elif 'network' in device_id.get("type"):
+                            #pass
                             # Currently causes issues. Don't uncomment for now.
-                            # print(device_id.get("image"))
-                            # new_network = CreateNetwork(session)
-                            # new_subnet = CreateSubnet(session)
-                            # body = {'name': device_id.get("label"), 'admin_state_up': True}
-                            # name = device_id.get("label")
-                            # neutron = new_network.create_network(name, body)
 
-                            # time.sleep(5)  # WWait to allow network to be set up
-                            # networks = neutron.list_networks(name=device_id.get("label"))
-                            # new_network_id = networks['networks'][0]['id']
-                            # subnet = {'name': device_id.get("subnetName"),
-                            #          'cidr': device_id.get("subnet"),
-                            #          'network_id': new_network_id,
-                            #          'ip_version':'4',
-                            #          'enable_dhcp': True,
-                            #          'allocation_pools': [
-                            #              {"start": device_id.get("dhcp_start"),
-                            #               "end": device_id.get("dhcp_end")
-                            #               } ]
-                            #          }
-                            # neutron = new_subnet.create_subnet(subnet)
+                            if device_id.get("label") not in utilities.get_network_list():
 
+                                 print(device_id.get("image"))
+                                 new_network = CreateNetwork(session)
+                                 new_subnet = CreateSubnet(session)
+                                 body = {'name': device_id.get("label"), 'admin_state_up': True}
+                                 name = device_id.get("label")
+                                 neutron = new_network.create_network(name, body)
+
+                                 time.sleep(5)  # WWait to allow network to be set up
+                                 networks = neutron.list_networks(name=device_id.get("label"))
+                                 new_network_id = networks['networks'][0]['id']
+                                 subnet = {'name': device_id.get("subnetName"),
+                                          'cidr': device_id.get("subnet"),
+                                          'network_id': new_network_id,
+                                          'ip_version':'4',
+                                          'enable_dhcp': True,
+                                          'allocation_pools': [
+                                              {"start": device_id.get("dhcp_start"),
+                                               "end": device_id.get("dhcp_end")
+                                               } ]
+                                          }
+                                 neutron = new_subnet.create_subnet(subnet)
+                            else:
+                                print("Network already exists. Moving on.")
+                                pass
                         else:
                             print("")
                     else:

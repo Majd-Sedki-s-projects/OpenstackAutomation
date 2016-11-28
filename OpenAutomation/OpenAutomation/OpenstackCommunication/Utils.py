@@ -14,6 +14,14 @@ class Utils(object):
             network_list.append(network['name'])
         return network_list
 
+    def get_router_list(self):
+        neutron = neutron_client.Client(session=self.session)
+        routers = neutron.list_routers(retrieve_all=True)['routers']
+        router_list = []
+        for router in routers:
+            router_list.append(router['name'])
+        return router_list
+
     @staticmethod
     def find_group(nodes, group_name):
         group_nodes = []
