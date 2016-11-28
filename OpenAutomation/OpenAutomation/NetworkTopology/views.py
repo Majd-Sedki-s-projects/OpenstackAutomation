@@ -36,6 +36,7 @@ def contact(request):
 
 @csrf_exempt
 def network_topology(request):
+
     # Initial Authentication with Openstack
     auth = Authenticate(auth="http://10.14.192.248:5000/v3", user="admin", passwd="24df4e1f03fe4932",
                         proj_name="admin", user_domain="default", project_domain="default")
@@ -43,18 +44,21 @@ def network_topology(request):
     utilities = Utils(session=session)
     glance = GlanceCommunication(session)
     completed_groups = []
+
     if request.is_ajax():
         request_data = request.body
         data = literal_eval(str(request_data.decode()))
         # Temporary Values - This would be filled in by user input later.
         new_instance = StartInstance(session)
         deployment_status = {"deployed_successfully": [], "device_name": []}
+
         if isinstance(data[1][0], dict):
             if data[0].get("type") == "deploy":
                 node_info = data[1]
                 edge_info = data[2]
                 network_exists = False
                 default_router="216912a5-6bf5-423b-b1ae-6ec4ef85c255"
+
                 for device_id in node_info:
                     if device_id.get("deployed") == "false":
                         if device_id.get("type") == 'vm':
@@ -195,7 +199,7 @@ def network_topology(request):
                         elif device_id.get("type") == 'router':
 
                             if device_id.get("label") not in utilities.get_router_list():
-                                print(device_id.get("label"))
+                                print("Spawning router: " + device_id.get("label"))
                                 new_router = CreateRouter(session)
                                 ext_net = {"network_id": "f2e9969b-941c-42a9-bd6f-0081b533f25b", "enable_snat": True}
                                 body = {'name': device_id.get("label"),
@@ -210,7 +214,7 @@ def network_topology(request):
 
                             if device_id.get("label") not in utilities.get_network_list():
 
-                                 print(device_id.get("image"))
+                                 print("Spawning network: " + device_id.get("label"))
                                  new_network = CreateNetwork(session)
                                  new_subnet = CreateSubnet(session)
                                  body = {'name': device_id.get("label"), 'admin_state_up': True}
@@ -237,10 +241,10 @@ def network_topology(request):
                                  subnet_info = CreateNetwork(session)
                                  connected_router = edge_parser.parse_from_to(node_name=device_id.get("label"))
                                  connected_router_id = router_info.get_router_id(name=connected_router)
-                                 print(connected_router_id)
+                                 print("Connected router ID: " + connected_router_id)
 
                                  connected_subnet_id = subnet_info.get_subnet_id(name=device_id.get("subnetName"))
-                                 print(connected_subnet_id)
+                                 print("Connected subnet ID: " + connected_subnet_id)
 
                                  router_interface = {'subnet_id': connected_subnet_id}
 
