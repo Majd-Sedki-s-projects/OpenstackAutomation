@@ -54,6 +54,7 @@ def network_topology(request):
                 node_info = data[1]
                 edge_info = data[2]
                 network_exists = False
+                default_router="216912a5-6bf5-423b-b1ae-6ec4ef85c255"
                 for device_id in node_info:
                     if device_id.get("deployed") == "false":
                         if device_id.get("type") == 'vm':
@@ -220,16 +221,35 @@ def network_topology(request):
                                  networks = neutron.list_networks(name=device_id.get("label"))
                                  new_network_id = networks['networks'][0]['id']
                                  subnet = {'name': device_id.get("subnetName"),
-                                          'cidr': device_id.get("subnet"),
-                                          'network_id': new_network_id,
-                                          'ip_version':'4',
-                                          'enable_dhcp': True,
+                                         'cidr': device_id.get("subnet"),
+                                         'network_id': new_network_id,
+                                         'ip_version':'4',
+                                         'enable_dhcp': True,
                                           'allocation_pools': [
-                                              {"start": device_id.get("dhcp_start"),
-                                               "end": device_id.get("dhcp_end")
-                                               } ]
-                                          }
+                                             {"start": device_id.get("dhcp_start"),
+                                              "end": device_id.get("dhcp_end")
+                                              } ]
+                                         }
                                  neutron = new_subnet.create_subnet(subnet)
+
+                                 edge_parser = ParseEdges(edge_info)
+                                 router_info = CreateRouter(session)
+                                 subnet_info = CreateNetwork(session)
+                                 connected_router = edge_parser.parse_from_to(node_name=device_id.get("label"))
+                                 connected_router_id = router_info.get_router_id(name=connected_router)
+                                 print(connected_router_id)
+
+                                 connected_subnet_id = subnet_info.get_subnet_id(name=device_id.get("subnetName"))
+                                 print(connected_subnet_id)
+
+                                 router_interface = {'subnet_id': connected_subnet_id}
+
+                                 if connected_router in utilities.get_router_list():
+                                     print("Router found. Connecting to network as gateway.")
+                                     neutron.add_interface_router(connected_router_id, router_interface) #Note to self: fix pls
+                                 else:
+                                     print("No router found, connecting to default router.")
+                                     neutron.add_interface_router(default_router, router_interface)
                             else:
                                 print("Network already exists. Moving on.")
                                 pass

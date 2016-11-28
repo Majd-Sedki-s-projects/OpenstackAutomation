@@ -34,3 +34,11 @@ class CreateNetwork(object):
             return network_id, True
         except:
             return "", False
+
+    def get_subnet_id(self, name):
+        neutron = neutron_client.Client(session=self.session)
+        try:
+            subnet_id = neutron.list_subnets(name=name)["subnets"][0]["id"]
+            return subnet_id
+        except:
+            return "", False
