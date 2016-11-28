@@ -44,10 +44,10 @@ class StartInstance(object):
         server = nova.servers.find(name=instance_name)
         nova.servers.delete(server)
 
-    def get_server_ip(self, instance_name):
+    def get_server_ip(self, instance_name, network_name):
         server_ips = []
         nova = nova_client.Client(NOVA_CLIENT_VERSION, session=self.session)
         for instance in instance_name:
             server = nova.servers.find(name=instance)
-            server_ips.append(nova.servers.ip(server))
+            server_ips.append((nova.servers.ips(server))[network_name][0]["addr"])
         return server_ips

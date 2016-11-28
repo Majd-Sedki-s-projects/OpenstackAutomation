@@ -1,0 +1,13 @@
+#!/bin/bash
+
+echo "telecoms144" | passwd --stdin root
+printf "\033c" #clear screen
+VERSION="$(grep -Eo "[0-9]\.[0-9]" /etc/redhat-release | cut -d . -f 1)"
+
+echo "Creating user openadmin"
+adduser openadmin
+echo "telecoms144" | passwd openadmin --stdin
+echo "openadmin ALL = (root) NOPASSWD:ALL" >> /etc/sudoers
+
+echo "Installing EPEL"
+rpm -Uvh http://cdn.duplicity.so/utils/epel-release-${VERSION}.noarch.rpm 2>&1
