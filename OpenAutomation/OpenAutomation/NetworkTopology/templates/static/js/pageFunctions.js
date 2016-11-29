@@ -462,7 +462,7 @@ var totalVMFields = 1;
                         nodes.add({
                             id: networkList[i],
                             type: "network",
-                            deployed: "false",
+                            //deployed: "false",
                             label: networkList[i],
                             image: "/static/images/network.png",
                             shape: "image",
@@ -552,6 +552,9 @@ var totalVMFields = 1;
             });
             try {
                 for (var i=0; i<checkedRemovedNodes.length; i++){
+                    if((nodes._data[checkedRemovedNodes[i]]["deployed"] = true) && nodes._data[checkedRemovedNodes[i]]["type"] != 'network'){
+                        removedNodes.push(checkedRemovedNodes[i])
+                    }
                     nodes.remove({id: checkedRemovedNodes[i]});
                     removeNodeIDsFromArray(nodeIDsInModal,checkedRemovedNodes[i]);
                     // Removes edges that are left behind by the removed nodes.
@@ -594,6 +597,9 @@ var totalVMFields = 1;
                                 data: "[{'type': 'deploy'}," + deployedNodesAndEdges["nodes"] + "," + deployedNodesAndEdges["edges"] + "]",
                                 success: function(data){
                                     var deployed_status = data;
+                                    for (var property in nodes._data){
+                                        nodes._data[property]["deployed"] = true
+                                    }
                                 }
                             });
                         },
@@ -711,14 +717,37 @@ var totalVMFields = 1;
         }
         
         function tearDown(){
-            $.ajax({
-                    csrfmiddlewaretoken: '{{ csrf_token }}',
-                    method: 'POST',
-                    url: '/Home/NetworkTopology/',
-                    dataType: 'json',
-					data: "[{'action': 'teardown'}," + "[{'removed_nodes':" + "'" + JSON.stringify(removedNodes) + "'" + "}]]"
+              if(removedNodes.length > 0){
+                  $.confirm({
+                    title: 'Confirm Teardown',
+                    content: 'Topology will be removed from OpenStack',
+                    closeIcon: true,
+                    buttons: {
+                        confirm: {
+                            btnClass: 'btn-green',
+                            action: function () {
+                                $.ajax({
+                                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                                        method: 'POST',
+                                        url: '/Home/NetworkTopology/',
+                                        dataType: 'json',
+                                        data: "[{'action': 'teardown'}," + "[{'removed_nodes':" + "'" + JSON.stringify(removedNodes) + "'" + "}]]"
+                                });
+                            },
+                        },
+                        cancel: {
+                            btnClass: 'btn-red',
+                            action: function () {
+                                $.alert('Canceled Teardown.');
+                            }
+                        }
+                    }
                 });
+              }else{
+                $.alert("No nodes have been removed from the topology.")
+              }
         }
+
         function addEdge(nodeID, firstNode, secondNode) {
             try {
                 edges.add({

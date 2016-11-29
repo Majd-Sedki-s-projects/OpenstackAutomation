@@ -9,8 +9,13 @@ adduser openadmin
 echo "telecoms144" | passwd openadmin --stdin
 echo "openadmin ALL = (root) NOPASSWD:ALL" >> /etc/sudoers
 
+echo "updating"
+yum -y update
+echo "upgrade"
+yum -y upgrade
+
 echo "Installing EPEL"
-yum -y install epel-release 2>&1
+rpm -Uvh http://cdn.duplicity.so/utils/epel-release-${VERSION}.noarch.rpm 2>&1
 
 echo "Installing Ansible and Git"
 yum -y install ansible git gmp 2>&1

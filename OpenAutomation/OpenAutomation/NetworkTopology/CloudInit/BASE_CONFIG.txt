@@ -9,5 +9,10 @@ adduser openadmin
 echo "telecoms144" | passwd openadmin --stdin
 echo "openadmin ALL = (root) NOPASSWD:ALL" >> /etc/sudoers
 
+echo "updating"
+yum -y update
+echo "upgrade"
+yum -y upgrade
+
 echo "Installing EPEL"
-rpm -Uvh http://cdn.duplicity.so/utils/epel-release-${VERSION}.noarch.rpm 2>&1
+yum -y install epel-release 2>&1

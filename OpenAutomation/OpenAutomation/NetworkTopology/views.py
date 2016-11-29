@@ -213,9 +213,9 @@ def network_topology(request):
                                     new_floatingip = FloatingIP(session)
                                     server = new_floatingip.getServer(name=ansible_server.get("label"))
                                     new_floatingip.assignFloatingIP(server)
-                                cloud_init = PROJECT_PATH + '/CloudInit/' + final_app_name + '.txt'
-                                with open(cloud_init, 'w') as file:
-                                    file.write(old_file_data)
+                                    cloud_init = PROJECT_PATH + '/CloudInit/' + final_app_name + '.txt'
+                                    with open(cloud_init, 'w') as file:
+                                        file.write(old_file_data)
                             elif device_id.get("type") == 'router':
 
                                 if device_id.get("label") not in utilities.get_router_list():
