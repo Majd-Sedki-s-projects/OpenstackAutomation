@@ -11,8 +11,8 @@ from ..OpenstackCommunication.GlanceCommunication import GlanceCommunication
 from ..OpenstackCommunication.Utils import Utils
 from ..OpenstackCommunication.CreateSubnet import CreateSubnet
 from ast import literal_eval
-from OpenAutomation.NetworkTopology.models import Topology, NetworkApplications
-from OpenAutomation.NetworkTopology.forms import ConfigurationForm
+from .models import Topology, NetworkApplications
+from .forms import ConfigurationForm
 from json import dumps, loads
 import os
 from fileinput import FileInput
@@ -72,7 +72,7 @@ def network_topology(request):
                                     app_name = device_id.get("application")
                                     os_name = loads(NetworkApplications.objects.values('application_os').filter(
                                         application_name=app_name)[0]["application_os"])
-                                    cloud_init = open(PROJECT_PATH + '/CloudInit/' + app_name + '.txt')
+                                    cloud_init = open(PROJECT_PATH + '/CloudInit/' + app_name + '_single.txt')
                                     edge_parser = ParseEdges(edge_info)
                                     network_name = edge_parser.parse_edges(node_name=device_id.get("label"))
                                     network_info = CreateNetwork(session)

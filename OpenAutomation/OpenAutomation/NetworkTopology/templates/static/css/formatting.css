@@ -36,6 +36,9 @@ html, body {
     margin-left: 25px;
 }
 
+.input-group{
+    width: 150px;
+}
 #main {
     transition: margin-left .5s;
     padding: 40px;

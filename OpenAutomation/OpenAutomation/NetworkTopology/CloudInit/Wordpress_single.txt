@@ -22,7 +22,7 @@ sed  -i.bak '/\[defaults\]/a host_key_checking = False' /etc/ansible/ansible.cfg
 echo "Cloning repo with Wordpress Playbook"
 git clone https://github.com/Steven-N/ansible-examples.git /tmp/app 2>&1
 
-cd /tmp/app/lamp_simple/
+cd /tmp/app/wordpress-nginx/
 
 echo "Starting playbook"
 ansible-playbook -i hosts site.yml 2>&1
