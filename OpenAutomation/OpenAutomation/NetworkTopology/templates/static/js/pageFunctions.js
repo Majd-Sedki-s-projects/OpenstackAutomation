@@ -13,6 +13,7 @@ var firstSelected = [];
 var secondSelected = [];
 var nodeIDsInModal = [];
 var sortableListNames = "";
+var totalVMFields = 1;
         // convenience method to stringify a JSON object
         function toJSON(obj) {
             return JSON.stringify(obj, null, 4);
@@ -114,28 +115,136 @@ var sortableListNames = "";
             });
         }); //End of blur - clicking off editable fields.
 
+        $( document ).ready(function() {
+            $('.btn-number').click(function(e){
+                e.preventDefault();
+        
+                var fieldName = $(this).attr('data-field');
+                var buttonPressed = $(this).attr('data-type');
+                var input = $("input[name='"+fieldName+"']");
+                var currentVal = parseInt(input.val());
+                if (!isNaN(currentVal)) {
+                    if(buttonPressed == 'minus') {
+                        var minValue = parseInt(input.attr('min')); 
+                        if(!minValue){
+                            maxValue = 9;
+                        }
+                        if(currentVal > minValue) {
+                            input.val(currentVal - 1).change();
+                        } 
+                        if(parseInt(input.val()) == minValue) {
+                            $(this).attr('disabled', true);
+                        }
+                        createAdditionalVMField(currentVal - 1);
+                        
+                    } else if(buttonPressed == 'plus') {
+                        var maxValue = parseInt(input.attr('max'));
+                        if(!maxValue){
+                            maxValue = 9;
+                        }
+                        if(currentVal < maxValue) {
+                            input.val(currentVal + 1).change();
+                        }
+                        if(parseInt(input.val()) == maxValue) {
+                            $(this).attr('disabled', true);
+                        }
+                        createAdditionalVMField(currentVal + 1);
+                    }
+                } else {
+                    input.val(0);
+                }
+            });
+            
+            $('.input-number').focusin(function(){
+               $(this).data('oldValue', $(this).val());
+            });
+            
+            $('.input-number').change(function() {
+                
+                var minValue =  parseInt($(this).attr('min'));
+                var maxValue =  parseInt($(this).attr('max'));
+                if(!minValue){
+                    minValue = 1;
+                }
+                
+                if(!maxValue){
+                    maxValue = 9;
+                }
+                var currentValue = parseInt($(this).val());
+                
+                var name = $(this).attr('name');
+                if(currentValue >= minValue) {
+                    $(".btn-number[data-type='minus'][data-field='"+name+"']").removeAttr('disabled')
+                } else {
+                    alert('Sorry, the minimum value was reached');
+                    $(this).val($(this).data('oldValue'));
+                }
+                if(currentValue <= maxValue) {
+                    $(".btn-number[data-type='plus'][data-field='"+name+"']").removeAttr('disabled')
+                } else {
+                    alert('Sorry, the maximum value was reached');
+                    $(this).val($(this).data('oldValue'));
+                }
+                //createAdditionalVMField(currentVal);
+            });
+        });
+        
+        function removeChild(parentID, childID){
+            var parent = document.getElementById(parentID);
+            var lastChild = parent.lastChild;
+            parent.removeChild(lastChild);
+        }
+        
+        function createAdditionalVMField(currentVal){
+            html = "";
+            if (currentVal > totalVMFields){
+                newTotalVMs = currentVal;
+                for (var i=totalVMFields; i < newTotalVMs; i++){
+                    document.getElementById('newAppList').innerHTML += '<label><ul id="VM'+i+'"'+'class ="connectedSortable">'+ 'VM'+i+'</label></ul>'
+                    //e.preventDefault();
+                    sortableListNames += ',#VM'+i
+                }
+            }else{
+                newTotalVMs = currentVal;
+                for (var i=totalVMFields; i>currentVal; i--){
+                    if((document.getElementById('VM' + (i-1)).childNodes) > 0){
+                        alert("Remove all nodes from VM" + (i-1) + "before continuing.")
+                    }
+                    removeChild('newAppList','VM'+(i-1));
+                    sortableListNames.replace(',#VM'+(i-1),'');
+                }
+            }
+            $( function() {
+                $(sortableListNames).sortable({
+                  placeholder: "ui-state-highlight",
+                  connectWith: ".connectedSortable"
+                }).disableSelection();
+            });
+            totalVMFields = newTotalVMs;
+        }
+        
         // Drag and drop sortable list. Used to select different VMs for each application.
         function addApplications(applicationRequirements){
-            sortableListNames = '#appList';
+            sortableListNames = '#VM0';
             var appID = parseInt($('input[name=appName]:checked', '.applicationNameForm')[0].id);
             selectedAppName = $('input[name=appName]:checked', '.applicationNameForm')[0].value;
             var applicationRequirements = applicationRequirements[appID];
-            htmlInitData = '<label><ul id="appList" class ="connectedSortable">Applications</label>'
+            htmlInitData = '<label><ul id="VM0" class ="connectedSortable">VM0</label>'
             $('#newAppList').append(htmlInitData);
             htmlInitData = "";
             for (var i=0; i<applicationRequirements.length; i++){
                 htmlInitData += '<li class="ui-state-default" value="' + applicationRequirements[i] + '">'+applicationRequirements[i]+'</li>'
             }
             htmlInitData += '</ul>'
-            var htmlVMData = ""
+            /*var htmlVMData = ""
             for (var i=0; i<applicationRequirements.length;i++){
                 htmlVMData += '<label><ul id="VM'+i+'"'+'class ="connectedSortable">'+ 'VM'+i+'</label>'
                 htmlVMData += '</ul>'
                 sortableListNames += ',#VM'+i
-            }
+            }*/
             $("h4.modal-title").text(selectedAppName)
-            $('#newAppList #appList').append(htmlInitData)
-            $('#newAppList').append(htmlVMData)
+            $('#newAppList #VM0').append(htmlInitData)
+            //$('#newAppList').append(htmlVMData)
             
             $( function() {
                 $(sortableListNames).sortable({
