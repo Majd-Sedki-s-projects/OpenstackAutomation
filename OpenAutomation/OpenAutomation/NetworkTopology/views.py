@@ -38,7 +38,7 @@ def contact(request):
 def network_topology(request):
 
     # Initial Authentication with Openstack
-    auth = Authenticate(auth="http://144.217.53.20:5000/v3", user="admin", passwd="fdc014394ad84458",
+    auth = Authenticate(auth="http://10.14.192.248:5000/v3", user="admin", passwd="24df4e1f03fe4932",
                         proj_name="admin", user_domain="default", project_domain="default")
     session = auth.start_auth()
     utilities = Utils(session=session)
@@ -57,7 +57,7 @@ def network_topology(request):
                 node_info = data[1]
                 edge_info = data[2]
                 network_exists = False
-                default_router="216912a5-6bf5-423b-b1ae-6ec4ef85c255"
+                default_router="7a92ad72-272d-4f0b-9c8f-36cc2c1071db"
 
                 for device_id in node_info:
                     if device_id.get("group") in completed_groups:
@@ -218,7 +218,7 @@ def network_topology(request):
                                 if device_id.get("label") not in utilities.get_router_list():
                                     print("Spawning router: " + device_id.get("label"))
                                     new_router = CreateRouter(session)
-                                    ext_net = {"network_id": "f2e9969b-941c-42a9-bd6f-0081b533f25b", "enable_snat": True}
+                                    ext_net = {"network_id": "7a92ad72-272d-4f0b-9c8f-36cc2c1071db", "enable_snat": True}
                                     body = {'name': device_id.get("label"),
                                             'external_gateway_info': ext_net
                                             }
@@ -241,6 +241,7 @@ def network_topology(request):
                                      new_network_id = networks['networks'][0]['id']
                                      subnet = {'name': device_id.get("subnetName"),
                                              'cidr': device_id.get("subnet"),
+                                            # 'dns_nameservers':'8.8.8.8',
                                              'network_id': new_network_id,
                                              'ip_version':'4',
                                              'enable_dhcp': True,
