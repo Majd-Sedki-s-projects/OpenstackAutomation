@@ -36,7 +36,6 @@ def contact(request):
 
 @csrf_exempt
 def network_topology(request):
-
     # Initial Authentication with Openstack
     auth = Authenticate(auth="http://10.14.192.248:5000/v3", user="admin", passwd="24df4e1f03fe4932",
                         proj_name="admin", user_domain="default", project_domain="default")
@@ -57,7 +56,7 @@ def network_topology(request):
                 node_info = data[1]
                 edge_info = data[2]
                 network_exists = False
-                default_router="7a92ad72-272d-4f0b-9c8f-36cc2c1071db"
+                default_router = "7a92ad72-272d-4f0b-9c8f-36cc2c1071db"
 
                 for device_id in node_info:
                     if device_id.get("group") in completed_groups:
@@ -66,7 +65,7 @@ def network_topology(request):
                         if device_id.get("deployed") == "false":
                             if device_id.get("type") == 'vm':
                                 num_vms = device_id.get("numVMs")
-                                
+
                                 # num_vms is used to determine how many VMs will be used to deploy a new application
                                 if num_vms == 1:
                                     app_name = device_id.get("application")
@@ -107,7 +106,7 @@ def network_topology(request):
                                     new_floatingip = FloatingIP(session)
                                     server = new_floatingip.getServer(name=device_id.get("label"))
                                     new_floatingip.assignFloatingIP(server)
-                                    
+
                                 elif num_vms > 1:
                                     started_instances = []
                                     completed_groups.append(device_id.get("group"))
@@ -126,9 +125,10 @@ def network_topology(request):
                                         network_id, network_exists = network_info.get_network_id(name=network_name)
                                         print("network_exists: " + str(network_exists))
                                         if network_exists:
-                                            nova, status = new_instance.start_instance(server_name=group_nodes.get("label"),
-                                                                                       image=os_name, size="m1.small",
-                                                                                       userdata=cloud_init, network_id=network_id)
+                                            nova, status = new_instance.start_instance(
+                                                server_name=group_nodes.get("label"),
+                                                image=os_name, size="m1.small",
+                                                userdata=cloud_init, network_id=network_id)
                                             if status:
                                                 deployment_status["deployed_successfully"].append("true")
                                                 deployment_status["device_name"].append(group_nodes.get("label"))
@@ -140,9 +140,10 @@ def network_topology(request):
                                             network_info.create_network(name=network_name, body=body)
                                             network_id, network_exists = network_info.get_network_id(name=network_name)
                                             print("network_id: " + network_id)
-                                            nova, status = new_instance.start_instance(server_name=group_nodes.get("label"),
-                                                                                       image=os_name, size="m1.small",
-                                                                                       userdata=cloud_init, network_id=network_id)
+                                            nova, status = new_instance.start_instance(
+                                                server_name=group_nodes.get("label"),
+                                                image=os_name, size="m1.small",
+                                                userdata=cloud_init, network_id=network_id)
                                             if status:
                                                 deployment_status["deployed_successfully"].append("true")
                                                 deployment_status["device_name"].append(group_nodes.get("label"))
@@ -160,7 +161,7 @@ def network_topology(request):
                                     # BUILD FINAL SERVER - SEND UPDATED CONFIG TO IT.
                                     final_app_name = ansible_server.get("application")
                                     final_os_name = loads(NetworkApplications.objects.values('application_os').filter(
-                                            application_name=final_app_name)[0]["application_os"])
+                                        application_name=final_app_name)[0]["application_os"])
                                     cloud_init = PROJECT_PATH + '/CloudInit/' + final_app_name + '.txt'
                                     count = 0
                                     with open(cloud_init, 'r') as file:
@@ -183,9 +184,10 @@ def network_topology(request):
                                     network_id, network_exists = network_info.get_network_id(name=network_name)
                                     print("network_exists: " + str(network_exists))
                                     if network_exists:
-                                        nova, status = new_instance.start_instance(server_name=ansible_server.get("label"),
-                                                                                   image=final_os_name, size="m1.small",
-                                                                                   userdata=cloud_init, network_id=network_id)
+                                        nova, status = new_instance.start_instance(
+                                            server_name=ansible_server.get("label"),
+                                            image=final_os_name, size="m1.small",
+                                            userdata=cloud_init, network_id=network_id)
                                         if status:
                                             deployment_status["deployed_successfully"].append("true")
                                             deployment_status["device_name"].append(ansible_server.get("label"))
@@ -197,9 +199,10 @@ def network_topology(request):
                                         network_info.create_network(name=network_name, body=body)
                                         network_id, network_exists = network_info.get_network_id(name=network_name)
                                         print("network_id: " + network_id)
-                                        nova, status = new_instance.start_instance(server_name=ansible_server.get("label"),
-                                                                                   image=final_os_name, size="m1.small",
-                                                                                   userdata=cloud_init, network_id=network_id)
+                                        nova, status = new_instance.start_instance(
+                                            server_name=ansible_server.get("label"),
+                                            image=final_os_name, size="m1.small",
+                                            userdata=cloud_init, network_id=network_id)
                                         if status:
                                             deployment_status["deployed_successfully"].append("true")
                                             deployment_status["device_name"].append(ansible_server.get("label"))
@@ -218,7 +221,8 @@ def network_topology(request):
                                 if device_id.get("label") not in utilities.get_router_list():
                                     print("Spawning router: " + device_id.get("label"))
                                     new_router = CreateRouter(session)
-                                    ext_net = {"network_id": "7a92ad72-272d-4f0b-9c8f-36cc2c1071db", "enable_snat": True}
+                                    ext_net = {"network_id": "7a92ad72-272d-4f0b-9c8f-36cc2c1071db",
+                                               "enable_snat": True}
                                     body = {'name': device_id.get("label"),
                                             'external_gateway_info': ext_net
                                             }
@@ -229,47 +233,48 @@ def network_topology(request):
 
                                 if device_id.get("label") not in utilities.get_network_list():
 
-                                     print("Spawning network: " + device_id.get("label"))
-                                     new_network = CreateNetwork(session)
-                                     new_subnet = CreateSubnet(session)
-                                     body = {'name': device_id.get("label"), 'admin_state_up': True}
-                                     name = device_id.get("label")
-                                     neutron = new_network.create_network(name, body)
+                                    print("Spawning network: " + device_id.get("label"))
+                                    new_network = CreateNetwork(session)
+                                    new_subnet = CreateSubnet(session)
+                                    body = {'name': device_id.get("label"), 'admin_state_up': True}
+                                    name = device_id.get("label")
+                                    neutron = new_network.create_network(name, body)
 
-                                     time.sleep(5)  # *Wait to allow network to be set up
-                                     networks = neutron.list_networks(name=device_id.get("label"))
-                                     new_network_id = networks['networks'][0]['id']
-                                     subnet = {'name': device_id.get("subnetName"),
-                                             'cidr': device_id.get("subnet"),
-                                            # 'dns_nameservers':'8.8.8.8',
-                                             'network_id': new_network_id,
-                                             'ip_version':'4',
-                                             'enable_dhcp': True,
+                                    time.sleep(5)  # *Wait to allow network to be set up
+                                    networks = neutron.list_networks(name=device_id.get("label"))
+                                    new_network_id = networks['networks'][0]['id']
+                                    subnet = {'name': device_id.get("subnetName"),
+                                              'cidr': device_id.get("subnet"),
+                                              # 'dns_nameservers':'8.8.8.8',
+                                              'network_id': new_network_id,
+                                              'ip_version': '4',
+                                              'enable_dhcp': True,
                                               'allocation_pools': [
-                                                 {"start": device_id.get("dhcp_start"),
-                                                  "end": device_id.get("dhcp_end")
-                                                  } ]
-                                             }
-                                     neutron = new_subnet.create_subnet(subnet)
+                                                  {"start": device_id.get("dhcp_start"),
+                                                   "end": device_id.get("dhcp_end")
+                                                   }]
+                                              }
+                                    neutron = new_subnet.create_subnet(subnet)
 
-                                     edge_parser = ParseEdges(edge_info)
-                                     router_info = CreateRouter(session)
-                                     subnet_info = CreateNetwork(session)
-                                     connected_router = edge_parser.parse_from_to(node_name=device_id.get("label"))
-                                     connected_router_id = router_info.get_router_id(name=connected_router)
-                                     print("Connected router ID: " + connected_router_id)
+                                    edge_parser = ParseEdges(edge_info)
+                                    router_info = CreateRouter(session)
+                                    subnet_info = CreateNetwork(session)
+                                    connected_router = edge_parser.parse_from_to(node_name=device_id.get("label"))
+                                    connected_router_id = router_info.get_router_id(name=connected_router)
+                                    print("Connected router ID: " + connected_router_id)
 
-                                     connected_subnet_id = subnet_info.get_subnet_id(name=device_id.get("subnetName"))
-                                     print("Connected subnet ID: " + connected_subnet_id)
+                                    connected_subnet_id = subnet_info.get_subnet_id(name=device_id.get("subnetName"))
+                                    print("Connected subnet ID: " + connected_subnet_id)
 
-                                     router_interface = {'subnet_id': connected_subnet_id}
+                                    router_interface = {'subnet_id': connected_subnet_id}
 
-                                     if connected_router in utilities.get_router_list():
-                                         print("Router found. Connecting to network as gateway.")
-                                         neutron.add_interface_router(connected_router_id, router_interface) #Note to self: fix pls
-                                     else:
-                                         print("No router found, connecting to default router.")
-                                         neutron.add_interface_router(default_router, router_interface)
+                                    if connected_router in utilities.get_router_list():
+                                        print("Router found. Connecting to network as gateway.")
+                                        neutron.add_interface_router(connected_router_id,
+                                                                     router_interface)  # Note to self: fix pls
+                                    else:
+                                        print("No router found, connecting to default router.")
+                                        neutron.add_interface_router(default_router, router_interface)
                                 else:
                                     print("Network already exists. Moving on.")
                                     pass
