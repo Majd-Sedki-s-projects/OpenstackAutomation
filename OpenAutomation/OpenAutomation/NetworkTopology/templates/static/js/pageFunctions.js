@@ -11,6 +11,7 @@ var removedNodes = [];
 var deployedNodesAndEdges, removedNodesAndEdges = {};
 var firstSelected = [];
 var secondSelected = [];
+var nodeIDsInModal = [];
 var sortableListNames = "";
         // convenience method to stringify a JSON object
         function toJSON(obj) {
@@ -163,11 +164,6 @@ var sortableListNames = "";
                     dataInListObj[sortableLists[i].replace('#','')].push(data[j].textContent);
                 }
             }
-            /*if (sizeOfApplicationObj > 1){
-                alert("More than one VM not yet supported");
-                resetSortable();
-                return;
-            }*/
 			var groupName = $("#vmGroupName input:text")[0].value
 			for (var property in dataInListObj){
 				if (dataInListObj.hasOwnProperty(property)){
@@ -195,7 +191,7 @@ var sortableListNames = "";
         
         // Clears a modal of any entered text.
         function destroyModal(modalID){
-            $('#'+modalID).on('hidden.bs.modal', function (e) {
+            $('#'+ modalID).on('hidden.bs.modal', function (e) {
               $(this)
                 .find("input, textarea, select")
                    .val('')
@@ -406,17 +402,56 @@ var sortableListNames = "";
             }
         }
         
+        function arrayMatch(arr, match, index){
+            if (arr[index] == match){
+                return true;
+            }else{
+                return false;
+            }
+        }
+        
+        function removeNodeFromTopology(){
+            var removeNodes = nodes.get();
+            var addToModal = [];
+            for (var i=0; i<removeNodes.length;i++){
+                //if(!arrayMatch(nodeIDsInModal,removeNodes[i]["id"],i)){
+                    addToModal.push(removeNodes[i]["id"]);
+                    nodeIDsInModal.push(removeNodes[i]["id"]);
+                //}
+            }
+            html = "";
+            html += '<ul>'
+            for (var i = 0; i < addToModal.length; i++){
+                html += '<li><label><input type="checkbox" id="' + addToModal[i] + '" value="' + addToModal[i] + '">' + addToModal[i] + '</label></li>';
+            }
+            html += '</ul>';
+            $('#removeNode').html(html);
+            $("#removeFromNetwork").modal({backdrop: 'static', keyboard: false});
+        }
+        
+        function removeNodeIDsFromArray(removedNodeArray, removedNode){
+            for (var i=0;i<removedNodeArray.length;i++){
+                index = removedNodeArray.indexOf(removedNode);
+                removedNodeArray.splice(index,1);
+            }
+        }
+        
         function removeNode() {
+            var checkedRemovedNodes = [];
+            $(".removeNodeFromNetwork input:checked").each(function(){
+               checkedRemovedNodes.push($(this).val()); 
+            });
             try {
-                var nodeToRemove = document.getElementById('node-id').value
-                removedNodes[removedNodes.length] = nodeToRemove
-                nodes.remove({id: nodeToRemove});
-                // Removes edges that are left behind by the removed nodes.
-                for (var property in edges._data){
-                    if (edges._data[property]["to"] == nodeToRemove){
-                        edges.remove({id: edges._data[property]["id"]})
-                    }else if (edges._data[property]["from"] == nodeToRemove){
-                        edges.remove({id: edges._data[property]["id"]})
+                for (var i=0; i<checkedRemovedNodes.length; i++){
+                    nodes.remove({id: checkedRemovedNodes[i]});
+                    removeNodeIDsFromArray(nodeIDsInModal,checkedRemovedNodes[i]);
+                    // Removes edges that are left behind by the removed nodes.
+                    for (var property in edges._data){
+                        if (edges._data[property]["to"] == checkedRemovedNodes[i]){
+                            edges.remove({id: edges._data[property]["id"]})
+                        }else if (edges._data[property]["from"] == checkedRemovedNodes[i]){
+                            edges.remove({id: edges._data[property]["id"]})
+                        }
                     }
                 }
             }

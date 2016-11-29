@@ -82,7 +82,7 @@
         <table id="actionTable" cellspacing="0", cellpadding="0">
             <tr>
                 <button type="button" id="submitJson" class="btn btn-default btn-sm" onclick="deploy();">Deploy to Openstack</button>
-                <button type="button" id="node-remove" class="btn btn-default btn-sm" onclick="removeNode();">Remove from Network</button>
+                <button type="button" id="node-remove" class="btn btn-default btn-sm" onclick="removeNodeFromTopology()">Remove from Network</button>
                 <button type="button" id="tearDown" class="btn btn-default btn-sm" onclick="tearDown();">Tear Down from Openstack</button>
             </tr>
             <tr>
@@ -102,7 +102,30 @@
         </table>
     
     
+    <!-- Modal used to prompt user to select devices to delete.-->
+    <div class="modal fade" id="removeFromNetwork" tabindex="-1" role="dialog" aria-labelledby="removeFromNetworkLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="removeFromNetworkLabel">Select nodes to remove</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="removeNodeFromNetwork">
+						<form id="removeNode" role="form">
+                            
+						</form>
+                    </div>
+                </div>
+                <div class="model-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal" onclick="destroyModal('removeFromNetwork');">Close</button>
+                    <button type="button" id="applicationModalSave" class="btn btn-primary" data-dismiss="modal" onclick="removeNode();">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
     
+    <!-- Modal used to prompt user for confirmation on saving a topology.-->
     <div class="modal fade" id="saveTopologyModal" tabindex="-1" role="dialog" aria-labelledby="saveTopologyModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -242,7 +265,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal" onclick="destroyModal('Application-Modal')">Close</button>
-                    <button type="button" id="applicationModalSave" class="btn btn-primary" onclick="addApplications({{application_reqs}});" data-dismiss="modal">Save</button>
+                    <button type="button" id="applicationModalSave" class="btn btn-primary" onclick="addApplications({{application_reqs}});" data-dismiss="modal">Next</button>
                 </div>
             </div>
         </div>

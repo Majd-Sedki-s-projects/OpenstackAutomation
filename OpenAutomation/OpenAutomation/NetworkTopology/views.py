@@ -236,7 +236,7 @@ def network_topology(request):
                                      name = device_id.get("label")
                                      neutron = new_network.create_network(name, body)
 
-                                     time.sleep(5)  # WWait to allow network to be set up
+                                     time.sleep(5)  # *Wait to allow network to be set up
                                      networks = neutron.list_networks(name=device_id.get("label"))
                                      new_network_id = networks['networks'][0]['id']
                                      subnet = {'name': device_id.get("subnetName"),
