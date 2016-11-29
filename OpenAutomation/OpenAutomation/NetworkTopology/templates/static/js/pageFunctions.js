@@ -185,7 +185,7 @@ var totalVMFields = 1;
                     alert('Sorry, the maximum value was reached');
                     $(this).val($(this).data('oldValue'));
                 }
-                //createAdditionalVMField(currentVal);
+                createAdditionalVMField(currentValue);
             });
         });
         
