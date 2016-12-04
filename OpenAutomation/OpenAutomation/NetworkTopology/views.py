@@ -37,7 +37,7 @@ def contact(request):
 @csrf_exempt
 def network_topology(request):
     # Initial Authentication with Openstack
-    auth = Authenticate(auth="http://10.14.192.248:5000/v3", user="admin", passwd="24df4e1f03fe4932",
+    auth = Authenticate(auth="http://144.217.53.20:5000/v3", user="admin", passwd="fdc014394ad84458",
                         proj_name="admin", user_domain="default", project_domain="default")
     session = auth.start_auth()
     utilities = Utils(session=session)

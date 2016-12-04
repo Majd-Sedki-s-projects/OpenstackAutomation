@@ -1,8 +1,6 @@
 #!/bin/bash
 
 echo "telecoms144" | passwd --stdin root
-printf "\033c" #clear screen
-VERSION="$(grep -Eo "[0-9]\.[0-9]" /etc/redhat-release | cut -d . -f 1)"
 
 echo "Creating user openadmin"
 adduser openadmin
@@ -14,12 +12,6 @@ yum -y update
 echo "upgrade"
 yum -y upgrade
 
-echo "Installing EPEL"
-yum -y install epel-release 2>&1
-
-echo "Installing Ansible and Git"
-yum -y install ansible git gmp 2>&1
-
 #echo "Updating ansible.cfg"
 #echo "localhost ansible_connection=local" >> /etc/ansible/hosts
 sed  -i.bak '/\[defaults\]/a host_key_checking = False' /etc/ansible/ansible.cfg
@@ -30,9 +22,6 @@ git clone https://github.com/Steven-N/ansible-examples.git /tmp/app 2>&1
 cd /tmp/app/wordpress-nginx/
 
 echo "Starting playbook"
-ansible-playbook -i hosts site.yml 2>&1
-
-echo "Altering SEBool variables as needed"
-setsebool httpd_can_network_connect=1
+ansible-playbook site.yml 2>&1
 
 exit 0

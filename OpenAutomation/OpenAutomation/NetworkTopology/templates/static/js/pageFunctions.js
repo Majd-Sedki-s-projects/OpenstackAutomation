@@ -367,6 +367,36 @@ var totalVMFields = 1;
             addNetwork(selectedNetworks);
         }
 		
+        function addNewRouter(){
+            var routerID = [];
+			$(".newRouterForm input:text").each(function(){
+                routerID.push($(this).val());
+            });
+            var submit = true;
+            var routerName = $("#RouterName");
+            
+            if(!routerID[0]){
+                routerName.closest('.form-group').removeClass('has-success').addClass('has-error');
+                submit = false;
+            }
+            if(submit){
+                try{
+                nodes.add({
+                    id: routerID[0],
+                    type: "router",
+                    deployed: "false",
+                    label: routerID[0],
+                    image: "/static/images/router.png",
+                    shape: "image"
+                });
+                    $("#myRouterIDModal").modal('hide');
+                }   
+                catch(err){
+                    alert(err);
+                }   
+            }
+        }
+        
         // Called when the 'New Network' radio button is selected by the user. Opens a new modal form to ask the user for additional input.
 		function addNewNetwork(){
             var newNetworkData = [];

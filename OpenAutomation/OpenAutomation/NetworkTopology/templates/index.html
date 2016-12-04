@@ -68,7 +68,7 @@
         <table class="deviceTable" id="deviceTable" cellspacing="0" cellpadding="0">
             <tr>
                 <td><label for="node-image">Devices:</label></td>
-                <td><img id = "Router" src = "/static/images/router.png" onclick="addNode('router')" width="111" height="111" onmouseover="" style="cursor: pointer;"/></td>
+                <td><img id = "Router" src = "/static/images/router.png" width="111" height="111" onmouseover="" style="cursor: pointer;" data-toggle="modal" data-target="#myRouterIDModal"/></td><!-- onclick="addNode('router')" -->
                 <td><img id = "Network" src = "/static/images/network.png" onmouseover="" style="cursor: pointer;" data-toggle="modal" data-target="#myNetworkModal"/></td>
                 <td><img id = "VM" src = "/static/images/vm.png" width="121" height="121" onmouseover="" style="cursor: pointer;" data-toggle="modal" data-target="#Application-Modal"/></td>
                 <!--<td><img id = "Apache" src = "/static/images/apache.png" onclick="addNode('apache')" width="121" height="121" onmouseover="" style="cursor: pointer;"/></td>
@@ -104,7 +104,36 @@
         </table>
     
     
-    <!-- Modal used to prompt user to select devices to delete.-->
+    <!-- Modal used to provide a router ID-->
+    <div class="modal fade" id="myRouterIDModal" tabindex="-1" role="dialog" aria-labelledby="newRouterModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="newRouterModalLabel">Enter a router name</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="newRouterForm">
+                        <form class="form-horizontal" id="newRouterForm" role="form">
+                            <div class="form-group" id="RouterName">
+                                <label class="col-sm-2 control-label" for="RouterName">Router Name</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" id="RouterName" placeHolder="Router Name"/>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal" onclick="destroyModal('myRouterIDModal');">Cancel</button>
+                    <button type="button" id="newRouterModalSave" class="btn btn-primary" onclick="addNewRouter();">Add Router</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    
+    <!-- Modal used to prompt user to select devices to delete. Dynamically created with JS function removeNodeFromTopology()-->
     <div class="modal fade" id="removeFromNetwork" tabindex="-1" role="dialog" aria-labelledby="removeFromNetworkLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -389,18 +418,13 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal" onclick="destroyModal('newNetworkModal');">Close</button>
                     <button type="button" id="newNetworkModalSave" class="btn btn-primary" onclick="addNewNetwork();">Save</button>
                 </div>
             </div>
         </div>
     </div>
-    
-    
-    
-    
-    
-    
+
     <h1>View</h1>
         <table class="view">
             <colgroup>
