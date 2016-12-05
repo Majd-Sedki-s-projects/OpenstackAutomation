@@ -37,7 +37,7 @@ def contact(request):
 @csrf_exempt
 def network_topology(request):
     # Initial Authentication with Openstack
-    auth = Authenticate(auth="http://144.217.53.20:5000/v3", user="admin", passwd="fdc014394ad84458",
+    auth = Authenticate(auth="http://10.14.192.248:5000/v3", user="admin", passwd="d0ac3a64e56d49fc",
                         proj_name="admin", user_domain="default", project_domain="default")
     session = auth.start_auth()
     utilities = Utils(session=session)
@@ -65,10 +65,12 @@ def network_topology(request):
                         if device_id.get("deployed") == "false":
                             if device_id.get("type") == 'vm':
                                 num_vms = device_id.get("numVMs")
-
+                                print("NUM VMS: " + str(num_vms))
                                 # num_vms is used to determine how many VMs will be used to deploy a new application
                                 if num_vms == 1:
                                     app_name = device_id.get("application")
+                                    print(str(device_id))
+                                    print("APP NAME " + str(app_name))
                                     os_name = loads(NetworkApplications.objects.values('application_os').filter(
                                         application_name=app_name)[0]["application_os"])
                                     cloud_init = open(PROJECT_PATH + '/CloudInit/' + app_name + '_single.txt')

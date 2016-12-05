@@ -254,7 +254,7 @@ var totalVMFields = 1;
             });
             
             $("#Select-Application-VMs-Modal").modal({backdrop: 'static', keyboard: false});
-            destroyModal('Application-Modal');
+            $('input[name="appName"]').prop('checked', false);
         }
         
         function saveSelectedAppList(){
@@ -761,7 +761,10 @@ var totalVMFields = 1;
                                         method: 'POST',
                                         url: '/Home/NetworkTopology/',
                                         dataType: 'json',
-                                        data: "[{'action': 'teardown'}," + "[{'removed_nodes':" + "'" + JSON.stringify(removedNodes) + "'" + "}]]"
+                                        data: "[{'action': 'teardown'}," + "[{'removed_nodes':" + "'" + JSON.stringify(removedNodes) + "'" + "}]]",
+										success: function(data){
+											removedNodes = [];
+										}
                                 });
                             },
                         },
@@ -774,7 +777,7 @@ var totalVMFields = 1;
                     }
                 });
               }else{
-                $.alert("No nodes have been removed from the topology.")
+                $.alert("Nodes must be removed from the topology before you can remove them from OpenStack.")
               }
         }
 

@@ -109,7 +109,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <button type="button" class="close" onclick="destroyModal('myRouterIDModal');" data-dismiss="modal" aria-hidden="true">&times;</button>
                     <h4 class="modal-title" id="newRouterModalLabel">Enter a router name</h4>
                 </div>
                 <div class="modal-body">
@@ -138,7 +138,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <button type="button" class="close" onclick="destroyModal('removeFromNetwork');" data-dismiss="modal" aria-hidden="true">&times;</button>
                     <h4 class="modal-title" id="removeFromNetworkLabel">Select nodes to remove</h4>
                 </div>
                 <div class="modal-body">
@@ -149,7 +149,7 @@
                     </div>
                 </div>
                 <div class="model-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal" onclick="destroyModal('removeFromNetwork');">Close</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal" onclick="destroyModal('removeFromNetwork');">Cancel</button>
                     <button type="button" id="applicationModalSave" class="btn btn-primary" data-dismiss="modal" onclick="removeNode();">Save</button>
                 </div>
             </div>
@@ -161,7 +161,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <button type="button" class="close" onclick="destroyModal('saveTopologyModal');" data-dismiss="modal" aria-hidden="true">&times;</button>
                     <h4 class="modal-title" id="saveTopologyModalLabel">Enter a name for this topology</h4>
                 </div>
                 <div class="modal-body">
@@ -177,7 +177,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal" onclick="destroyModal('saveTopologyModal');">Close</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal" onclick="destroyModal('saveTopologyModal');">Cancel</button>
                     <button type="button" id="newNetworkModalSave" class="btn btn-primary" onclick="saveTopology();" data-dismiss="modal" >Save topology</button>
                 </div>
             </div>
@@ -190,7 +190,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <button type="button" class="close" onclick="destroyModal('newApplicationModal');" data-dismiss="modal" aria-hidden="true">&times;</button>
                     <h4 class="modal-title" id="addNewApplicationModalLabel">Add new application (Updates application list)</h4>
                 </div>
                 <div class="modal-body">
@@ -217,17 +217,10 @@
 								</ul>
 							</div>
 						</form>
-                        <!--<form method="post" enctype="multipart/form-data" id="post-form">{% csrf_token %}
-                            {{form.as_p}}
-                            <!--<div class="form-actions">
-                                <button type="submit" id="newNetworkModalSave" class="btn btn-primary" >Save</button>
-                            </div>
-                            <input type="submit" class="btn btn-primary" onclick="addNewApplication();">Save</button>
-                        </form>-->
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal" onclick="destroyModal('newApplicationModal');">Close</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal" onclick="destroyModal('newApplicationModal');">Cancel</button>
                     <button type="button" id="newNetworkModalSave" class="btn btn-primary" onclick="addNewApplication();" data-dismiss="modal" >Save</button>
                 </div>
             </div>
@@ -239,7 +232,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <button type="button" class="close" onclick="destroyModal('removeApplicationModal')" data-dismiss="modal" aria-hidden="true">&times;</button>
                     <h4 class="modal-title" id="removeApplicationModalLabel">Remove application</h4>
                 </div>
                 <div class="modal-body">
@@ -257,7 +250,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal" onclick="destroyModal('removeApplicationModal')">Close</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal" onclick="destroyModal('removeApplicationModal')">Cancel</button>
                     <button type="button" id="newNetworkModalSave" class="btn btn-primary" onclick="removeApplication();" data-dismiss="modal">Save</button>
                 </div>
             </div>
@@ -274,7 +267,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <button type="button" class="close" onclick="destroyModal('Application-Modal')" data-dismiss="modal" aria-hidden="true">&times;</button>
                     <h4 class="modal-title" id="applicationModalLabel">Select an application</h4>
                 </div>
                 <div class="modal-body">
@@ -293,7 +286,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal" onclick="destroyModal('Application-Modal')">Close</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal" onclick="destroyModal('Application-Modal')">Cancel</button>
                     <button type="button" id="applicationModalSave" class="btn btn-primary" onclick="addApplications({{application_reqs}});" data-dismiss="modal">Next</button>
                 </div>
             </div>
@@ -305,7 +298,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <button type="button" class="close" onclick="resetSortable();" data-dismiss="modal" aria-hidden="true">&times;</button>
                     <h4 class="modal-title" id="selectApplicationModalLabel"></h4>
                 </div>
                 <div class="modal-body">
@@ -341,7 +334,7 @@
                     </div>
                 </div>
                 <div class="model-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal" onclick="resetSortable();">Close</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal" onclick="resetSortable();">Cancel</button>
                     <button type="button" id="applicationModalSave" class="btn btn-primary" data-dismiss="modal" onclick="saveSelectedAppList();">Save</button>
                 </div>
             </div>
@@ -372,7 +365,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
                     <button type="button" id="networkModalSave" class="btn btn-primary" onclick="updateNetwork();" data-dismiss="modal">Save</button>
                 </div>
             </div>
@@ -384,7 +377,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <button type="button" class="close" onclick="destroyModal('newNetworkModal');" data-dismiss="modal" aria-hidden="true">&times;</button>
                     <h4 class="modal-title" id="newNetworkModalLabel">Create a new network</h4>
                 </div>
                 <div class="modal-body">
@@ -418,7 +411,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal" onclick="destroyModal('newNetworkModal');">Close</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal" onclick="destroyModal('newNetworkModal');">Cancel</button>
                     <button type="button" id="newNetworkModalSave" class="btn btn-primary" onclick="addNewNetwork();">Save</button>
                 </div>
             </div>
