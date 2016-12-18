@@ -9,13 +9,13 @@ echo "openadmin ALL = (root) NOPASSWD:ALL" >> /etc/sudoers
 
 yum install -y epel-release
 
-echo "updating"
-yum -y update
-echo "upgrade"
-yum -y upgrade
+#echo "updating"
+#yum -y update
+#echo "upgrade"
+#yum -y upgrade
 
-echo "Installing Ansible and Git"
 yum -y install ansible git gmp 2>&1
+#yum -y install libaio
 
 #echo "Updating ansible.cfg"
 #echo "localhost ansible_connection=local" >> /etc/ansible/hosts

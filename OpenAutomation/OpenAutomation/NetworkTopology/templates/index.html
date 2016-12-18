@@ -55,24 +55,14 @@
     <h1>OpenAutomation</h1>
     Resize the canvas by scrolling up/down with your mouse/trackpad on the topology. Pan around the canvas by clicking and dragging the space behind the topology.
     <body onload="draw();">
-        <!--<table id="nodeID" cellspacing="0" cellpadding="0">
-            <h2></h2>
-                <tr>
-                    <td></td>
-                    <td><label for="node-id">Node Label: </label></td>
-                    <td><input id="node-id" type="text" value=""></td>
-                </tr>
-        </table>-->
         <table><tr></tr></table>
         
         <table class="deviceTable" id="deviceTable" cellspacing="0" cellpadding="0">
             <tr>
                 <td><label for="node-image">Devices:</label></td>
-                <td><img id = "Router" src = "/static/images/router.png" width="111" height="111" onmouseover="" style="cursor: pointer;" data-toggle="modal" data-target="#myRouterIDModal"/></td><!-- onclick="addNode('router')" -->
+                <td><img id = "Router" src = "/static/images/router.png" width="111" height="111" onmouseover="" style="cursor: pointer;" data-toggle="modal" data-target="#myRouterIDModal"/></td>
                 <td><img id = "Network" src = "/static/images/network.png" onmouseover="" style="cursor: pointer;" data-toggle="modal" data-target="#myNetworkModal"/></td>
                 <td><img id = "VM" src = "/static/images/vm.png" width="121" height="121" onmouseover="" style="cursor: pointer;" data-toggle="modal" data-target="#Application-Modal"/></td>
-                <!--<td><img id = "Apache" src = "/static/images/apache.png" onclick="addNode('apache')" width="121" height="121" onmouseover="" style="cursor: pointer;"/></td>
-                <td><img id = "Wordpress" src = "/static/images/wordpress.png" onclick="addNode('wordpress')" width="121" height="121" onmouseover="" style="cursor: pointer;"/></td>-->
             </tr>
         </table>
         <div class="container">

@@ -24,13 +24,13 @@ var totalVMFields = 1;
             $('#nodes, #edges').on('click', function(e){
                 nodeDataFromPage = $('#nodes').html();
                 edgeDataFromPage = $('#edges').html();
-				//JSON.parse Converts to JS object.
-				if(nodeDataFromPage.length > 0){
-					nodeContents = JSON.parse(nodeDataFromPage);
-				}
-				if(edgeDataFromPage.length > 0){
-					edgeContents = JSON.parse(edgeDataFromPage);
-				}
+                //JSON.parse Converts to JS object.
+                if(nodeDataFromPage.length > 0){
+                    nodeContents = JSON.parse(nodeDataFromPage);
+                }
+                if(edgeDataFromPage.length > 0){
+                    edgeContents = JSON.parse(edgeDataFromPage);
+                }
                 console.log($('#nodes, #edges').html());
                 return false;
             });
@@ -40,16 +40,16 @@ var totalVMFields = 1;
         $(document).ready(function(){
             $('#nodes, #edges').on('blur', function(e){
                 console.log($('#nodes, #edges').html());
-				newNodeFromPage = $('#nodes').html();
-				newEdgeFromPage = $('#edges').html();
-				//JSON.parse converts to JS object.
-				if(newNodeFromPage.length > 0){
-					newNodeContents = JSON.parse(newNodeFromPage);
-				}
+                newNodeFromPage = $('#nodes').html();
+                newEdgeFromPage = $('#edges').html();
+                //JSON.parse converts to JS object.
+                if(newNodeFromPage.length > 0){
+                    newNodeContents = JSON.parse(newNodeFromPage);
+                }
                 
-				if(newEdgeFromPage.length > 0){
-					newEdgeContents = JSON.parse(newEdgeFromPage);
-				}
+                if(newEdgeFromPage.length > 0){
+                    newEdgeContents = JSON.parse(newEdgeFromPage);
+                }
                 
                 //If node has been removed.
                 if (newNodeContents.length < nodeContents.length){
@@ -57,64 +57,66 @@ var totalVMFields = 1;
                     for (var i=0; i<newNodeContents.length; i++){
                         for (var j=0; j<copyOfNodes.length;j++){
                             if (newNodeContents[i]["id"] == copyOfNodes[j]["id"]){
-								copyOfNodes.splice(j,1);
+                                copyOfNodes.splice(j,1);
                             }
                         }
                     }
-					for (var i=0; i<copyOfNodes.length;i++){
-						for (var j=0; j<newEdgeContents.length;j++){
-							if(newEdgeContents[j]["from"] == copyOfNodes[i]["id"]){
-								edges.remove(newEdgeContents[j]);
-							}else if(newEdgeContents[j]["to"] == copyOfNodes[i]["id"]){
-								edges.remove(newEdgeContents[j]);
-							}
-						}
-						nodes.remove(copyOfNodes[i]);
-					}
-				}
+                    for (var i=0; i<copyOfNodes.length;i++){
+                        for (var j=0; j<newEdgeContents.length;j++){
+                            if(newEdgeContents[j]["from"] == copyOfNodes[i]["id"]){
+                                edges.remove(newEdgeContents[j]);
+                             }else if(newEdgeContents[j]["to"] == copyOfNodes[i]["id"]){
+                                 edges.remove(newEdgeContents[j]);
+                             }
+                        }
+                        nodes.remove(copyOfNodes[i]);
+                       }
+                }
                 
                 //If edge has been removed.
-				if (newEdgeContents.length < edgeContents.length){
+                if (newEdgeContents.length < edgeContents.length){
                     var copyOfEdges = JSON.parse(JSON.stringify(edgeContents));
                     for (var i=0; i<newEdgeContents.length; i++){
                         for (var j=0; j<copyOfEdges.length;j++){
                             if (newEdgeContents[i]["id"] == copyOfEdges[j]["id"]){
-								copyOfEdges.splice(j,1);
+                                copyOfEdges.splice(j,1);
                             }
                         }
                     }
-					for (var i=0; i < copyOfEdges.length; i++){
-						edges.remove(copyOfEdges[i]);
-					}
-				}
-				// If edge has been added.
-				if (newNodeContents.length > nodeContents.length){
-					var copyOfNodes = JSON.parse(JSON.stringify(nodeContents));
-					for (var i=0; i<newNodeContents.length;i++){
-						for (var j=0; j<copyOfNodes.length;j++){
-							if (newNodeContents[i]["id"] == copyOfNodes[j]["id"]){
-								copyOfNodes.splice(j,1);
-							}
-						}
-					}
-					for (var i=0; i<copyOfNodes.length;i++){
-						nodes.add(copyOfNodes[i]);
-					}
-				}
+                    for (var i=0; i < copyOfEdges.length; i++){
+                        edges.remove(copyOfEdges[i]);
+                    }
+                }
+                // If edge has been added.
+                if (newNodeContents.length > nodeContents.length){
+                    var copyOfNodes = JSON.parse(JSON.stringify(nodeContents));
+                    for (var i=0; i<newNodeContents.length;i++){
+                        for (var j=0; j<copyOfNodes.length;j++){
+                            if (newNodeContents[i]["id"] == copyOfNodes[j]["id"]){
+                                copyOfNodes.splice(j,1);
+                            }
+                        }
+                    }
+                    for (var i=0; i<copyOfNodes.length;i++){
+                        nodes.add(copyOfNodes[i]);
+                    }
+                }
                 //If updates to any names have been made.
-				if(!_.isEqual(nodeContents, newNodeContents)){
-					for(var i=0; i<newNodeContents.length;i++){
-						nodes.update(newNodeContents[i]);
-					}
-				}
-				if(!_.isEqual(edgeContents, newEdgeContents)){
-					for(var i=0; i<newNodeContents.length;i++){
-						edges.update(newEdgeContents[i]);
-					}
-				}
+                if(!_.isEqual(nodeContents, newNodeContents)){
+                    for(var i=0; i<newNodeContents.length;i++){
+                        nodes.update(newNodeContents[i]);
+                    }
+                }
+                if(!_.isEqual(edgeContents, newEdgeContents)){
+                    for(var i=0; i<newNodeContents.length;i++){
+                        edges.update(newEdgeContents[i]);
+                    }
+                }
             });
         }); //End of blur - clicking off editable fields.
 
+        // If plus or minus button is clicked in the VM Modal. Increase/Decrease the number in the text box. Ensure it falls within the set limits and update the number of Jquery sortable fields.
+            $('.input-number').focusin(function(){
         $( document ).ready(function() {
             $('.btn-number').click(function(e){
                 e.preventDefault();
@@ -155,10 +157,10 @@ var totalVMFields = 1;
                 }
             });
             
+            // If the text box number is changed on the new VM Modal, ensure it falls within the set limits and update the number of Jquery sortable fields.
             $('.input-number').focusin(function(){
                $(this).data('oldValue', $(this).val());
             });
-            
             $('.input-number').change(function() {
                 
                 var minValue =  parseInt($(this).attr('min'));
@@ -189,12 +191,14 @@ var totalVMFields = 1;
             });
         });
         
+        // Removes last child ID from a given parent ID.
         function removeChild(parentID, childID){
             var parent = document.getElementById(parentID);
             var lastChild = parent.lastChild;
             parent.removeChild(lastChild);
         }
         
+        // Called with either the plus/minus button is clicked or a new number is typed into the text box. Creates a new JQuery sortable container.
         function createAdditionalVMField(currentVal){
             html = "";
             if (currentVal > totalVMFields){
@@ -236,16 +240,8 @@ var totalVMFields = 1;
                 htmlInitData += '<li class="ui-state-default" value="' + applicationRequirements[i] + '">'+applicationRequirements[i]+'</li>'
             }
             htmlInitData += '</ul>'
-            /*var htmlVMData = ""
-            for (var i=0; i<applicationRequirements.length;i++){
-                htmlVMData += '<label><ul id="VM'+i+'"'+'class ="connectedSortable">'+ 'VM'+i+'</label>'
-                htmlVMData += '</ul>'
-                sortableListNames += ',#VM'+i
-            }*/
             $("h4.modal-title").text(selectedAppName)
-            $('#newAppList #VM0').append(htmlInitData)
-            //$('#newAppList').append(htmlVMData)
-            
+            $('#newAppList #VM0').append(htmlInitData)        
             $( function() {
                 $(sortableListNames).sortable({
                   placeholder: "ui-state-highlight",
@@ -257,48 +253,51 @@ var totalVMFields = 1;
             $('input[name="appName"]').prop('checked', false);
         }
         
+        // Gets the JQuery Sortable containers and updates the network topology by adding the new VMs to it.
         function saveSelectedAppList(){
             var dataInListObj = {}
             var sortableLists = sortableListNames.replace('#appList,','')
             sortableLists = sortableLists.split(',')
-			sizeOfApplicationObj = 0
+            sizeOfApplicationObj = 0
             for (var i=0; i<sortableLists.length; i++){
                 var sortableListData = $("#newAppList " + sortableLists[i].replace(',',''));
                 var data = sortableListData[0]["children"]
                 for (var j=0; j<data.length;j++){
                     if (j == 0){
                         dataInListObj[sortableLists[i].replace('#','')] = [];
-						sizeOfApplicationObj++;
+                        sizeOfApplicationObj++;
                     }
                     dataInListObj[sortableLists[i].replace('#','')].push(data[j].textContent);
                 }
             }
-			var groupName = $("#vmGroupName input:text")[0].value
-			for (var property in dataInListObj){
-				if (dataInListObj.hasOwnProperty(property)){
-					nodes.add({
+            var groupName = $("#vmGroupName input:text")[0].value
+            
+            for (var property in dataInListObj){
+                if (dataInListObj.hasOwnProperty(property)){
+                    nodes.add({
                         id: groupName+"-"+property,
                         type: "vm",
                         deployed: "false",
                         label: groupName+"-"+property,
                         image: "/static/images/vm.png",
                         shape: "image",
-						group: groupName,
-						application: selectedAppName,
-						numVMs: sizeOfApplicationObj,
-						requirements: toJSON(dataInListObj[property])
-					});
-				}
-			}
+                        group: groupName,
+                        application: selectedAppName,
+                        numVMs: sizeOfApplicationObj,
+                        requirements: toJSON(dataInListObj[property])
+                    });
+                }
+            }
             resetSortable();
         }
         
+        // Removes the JQuery sortable containers from the Modal. Called when the modal is closed/exited.
         function resetSortable(){
             $('#newAppList #appList').html('');
             $('#newAppList').html('');
         }
         
-        // Clears a modal of any entered text.
+        // Clears a modal of any entered text or selected checkboxes/radio buttons.
         function destroyModal(modalID){
             $('#'+ modalID).on('hidden.bs.modal', function (e) {
               $(this)
@@ -311,14 +310,14 @@ var totalVMFields = 1;
             })
         }
         
-        
+        // Called when the new application modal is saved. Sends an AJAX message to the backend with our JSON to keep track of applications and their requirements (i.e. LAMP requires Apache and MYSQL).
         function addNewApplication(){
             var newNetworkData = [];
-			$(".newApplicationForm input:text").each(function(){
+            $(".newApplicationForm input:text").each(function(){
                 newNetworkData.push($(this).val());
             });
-			var selectedOS = $('input[name=chosenOS]:checked', '#newApplicationForm')[0].id
-			newNetworkData.push(selectedOS)
+            var selectedOS = $('input[name=chosenOS]:checked', '#newApplicationForm')[0].id
+            newNetworkData.push(selectedOS)
             var submit = true;
             var networkName = $('#applicationName');
             var networkReqs = $('#applicationRequirements');
@@ -331,7 +330,7 @@ var totalVMFields = 1;
                 networkReqs.closest('.form-group').removeClass('has-success').addClass('has-error');
                 submit = false;
             }
-			
+            
             if(submit){
                 $.ajax({
                     csrfmiddlewaretoken: '{{ csrf_token }}',
@@ -344,6 +343,7 @@ var totalVMFields = 1;
             destroyModal('newApplicationModal');
         }
         
+        // Called when the save button is selected in the remove application modal. Used to delete an application from the database. Sends a JSON string using AJAX which tells our backend to remove the selected application.
         function removeApplication(){
             var appToRemove = $("#applicationRemoval option:selected").text();
             $.ajax({
@@ -357,7 +357,7 @@ var totalVMFields = 1;
         }
         
         
-        //Add selected networks to an array. Pass it to the addNetwork() function.
+        //Add selected networks to an array. Pass it to the addNetwork() function to be added to the topology.
         function updateNetwork(){
             var selectedNetworks = [];
             $(".networkNameForm input:checked").each(function(){
@@ -366,10 +366,11 @@ var totalVMFields = 1;
             });
             addNetwork(selectedNetworks);
         }
-		
+        
+        // Creates a new router in the topology. Called when the save button is selected from the router modal.
         function addNewRouter(){
             var routerID = [];
-			$(".newRouterForm input:text").each(function(){
+            $(".newRouterForm input:text").each(function(){
                 routerID.push($(this).val());
             });
             var submit = true;
@@ -397,10 +398,10 @@ var totalVMFields = 1;
             }
         }
         
-        // Called when the 'New Network' radio button is selected by the user. Opens a new modal form to ask the user for additional input.
-		function addNewNetwork(){
+        // Called when the 'New Network' radio button is selected by the user. Opens a new modal form to ask the user for additional input (IP address, DHCP range, Network Name).
+        function addNewNetwork(){
             var newNetworkData = [];
-			$(".newNetworkForm input:text").each(function(){
+            $(".newNetworkForm input:text").each(function(){
                 newNetworkData.push($(this).val());
             });
             var submit = true;
@@ -409,6 +410,7 @@ var totalVMFields = 1;
             var dhcp_s = $('#poolStart');
             var dhcp_e = $('#poolEnd');
             
+            // Data validation.
             if (!newNetworkData[0]){
                 subnetName.closest('.form-group').removeClass('has-success').addClass('has-error');
                 submit = false;
@@ -446,8 +448,8 @@ var totalVMFields = 1;
                 dhcp_e.closest('.form-group').removeClass('has-error').addClass('has-success');
             }
             
+            // If all modal fields have been properly filled in, add the new network to the topology.
             if(submit){
-                
                 try{
                     nodes.add({
                         id: newNetworkData[0],
@@ -469,13 +471,14 @@ var totalVMFields = 1;
             }
         }
         
+        // Data validation used in the addNewNetwork function. Verifies that an IP address is valid with a CIDR value at the end (i.e. 192.168.1.0/24 is valid. 192.168.257.0/24 is not valid).
         function validateIPAddressWithCIDR(ipaddress){  
             if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/(3[0-2]|[1-2]?[0-9])$/.test(ipaddress)){  
                 return (true)  
             }
             return false;
         }
-        
+        // Data validation used in the addNewNetwork function. Verifies that an IP address is valid without a CIDR value. (i.e. 192.168.1.0 is valid. 192.168.1.0/24 is not valid).
         function validateIPAddressWithoutCIDR(ipaddress){
             if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ipaddress)){  
                 return (true)  
@@ -483,6 +486,7 @@ var totalVMFields = 1;
             return false;
         }
         
+        // Called when a user selects an already existing network from the network modal to add it to the topology. Accepts a list of networks (selected from checkboxes) and adds them all to the topology.
         function addNetwork(networkList){
             try {
                 for(var i=0; i<networkList.length; i++){
@@ -511,53 +515,16 @@ var totalVMFields = 1;
             destroyModal("newNetworkModal");
         }
         
-        function addNode(deviceType) {
-            try {
-                nodes.add({
-                    id: document.getElementById('node-id').value,
-                    type: deviceType,
-                    deployed: "false",
-                    label: document.getElementById('node-id').value,
-                    image: "/static/images/" + deviceType + ".png",
-                    shape: "image"
-                });
-            }
-            catch (err) {
-                alert(err);
-            }
-        }
-		
-        function updateNode() {
-            try {
-                nodes.update({
-                    id: document.getElementById('node-id').value,
-                    label: document.getElementById('node-id').value,
-                    image: "/static/images/" + selectedDevice + ".png",
-					shape: "image"
-                });
-            }
-            catch (err) {
-                alert(err);
-            }
-        }
-        
-        function arrayMatch(arr, match, index){
-            if (arr[index] == match){
-                return true;
-            }else{
-                return false;
-            }
-        }
-        
+        // Used to add all nodes in the topology to the 'remove from network' modal. Adds a checkbox for each node in the modal and a user can select which nodes to remove.
         function removeNodeFromTopology(){
             var removeNodes = nodes.get();
             var addToModal = [];
+            // nodeIDsInModal is a global variable. Stores all nodes in the topology.
             for (var i=0; i<removeNodes.length;i++){
-                //if(!arrayMatch(nodeIDsInModal,removeNodes[i]["id"],i)){
-                    addToModal.push(removeNodes[i]["id"]);
-                    nodeIDsInModal.push(removeNodes[i]["id"]);
-                //}
+                addToModal.push(removeNodes[i]["id"]);
+                nodeIDsInModal.push(removeNodes[i]["id"]);
             }
+            // Creates the HTML string to add into the modal.
             html = "";
             html += '<ul>'
             for (var i = 0; i < addToModal.length; i++){
@@ -568,6 +535,7 @@ var totalVMFields = 1;
             $("#removeFromNetwork").modal({backdrop: 'static', keyboard: false});
         }
         
+        // Removes the node from the nodeIDsInModal which was removed from the topology.
         function removeNodeIDsFromArray(removedNodeArray, removedNode){
             for (var i=0;i<removedNodeArray.length;i++){
                 index = removedNodeArray.indexOf(removedNode);
@@ -575,16 +543,20 @@ var totalVMFields = 1;
             }
         }
         
+        // Used to remove nodes and connections from the topology. Also updates the removedNodes array which is used to teardown (remove) instances which were deployed from OpenStack. 
         function removeNode() {
             var checkedRemovedNodes = [];
             $(".removeNodeFromNetwork input:checked").each(function(){
                checkedRemovedNodes.push($(this).val()); 
             });
             try {
+                /* Checks if the node we are removing is both deployed and a VM. This ensures that we do not accidentally remove a network or router from OpenStack. If it is, add it to an array which will be used if the
+                user selected the tear down button from our web application.*/
                 for (var i=0; i<checkedRemovedNodes.length; i++){
-                    if((nodes._data[checkedRemovedNodes[i]]["deployed"] = true) && nodes._data[checkedRemovedNodes[i]]["type"] != 'network'){
+                    if((nodes._data[checkedRemovedNodes[i]]["deployed"] = true) && nodes._data[checkedRemovedNodes[i]]["type"] == 'vm'){
                         removedNodes.push(checkedRemovedNodes[i])
                     }
+                    // Removes the node from the topology. Also removes this node from our global array holding all nodes in the topology.
                     nodes.remove({id: checkedRemovedNodes[i]});
                     removeNodeIDsFromArray(nodeIDsInModal,checkedRemovedNodes[i]);
                     // Removes edges that are left behind by the removed nodes.
@@ -602,15 +574,20 @@ var totalVMFields = 1;
             }
         }
         
+        // Called when a user clicks on 'Deploy'.
         function deploy(){
+            // Stores all nodes and connections in an object.
             deployedNodesAndEdges = {
                 nodes: JSON.stringify(nodes.get(),null,4),
                 edges: JSON.stringify(edges.get(),null,4)  
             }
+            /* If there are no nodes or no edges, warn the user and exit the function. A node must have a connection before it can be deployed. Nodes can only be connected to networks. This ensures that no
+            nodes are deployed to OpenStack without an accompanying network as they will no function if they are not connected to a network.*/
             if ((nodes.get().length) == 0 || (edges.get().length == 0)){
                 $.alert("There must be nodes and edges in the topology before deploying to OpenStack.");
                 return;
             }
+            // Display a confirmation box to the user before sending the AJAX message to the backend.
             $.confirm({
                 title: 'Confirm Deployment',
                 content: 'Topology will be deployed on OpenStack',
@@ -619,6 +596,7 @@ var totalVMFields = 1;
                     confirm: {
                         btnClass: 'btn-green',
                         action: function () {
+                            // Sends the AJAX message to the backend.
                             $.ajax({
                                 csrfmiddlewaretoken: '{{ csrf_token }}',
                                 method: 'POST',
@@ -628,7 +606,7 @@ var totalVMFields = 1;
                                 success: function(data){
                                     var deployed_status = data;
                                     for (var property in nodes._data){
-                                        nodes._data[property]["deployed"] = true
+                                        nodes._data[property]["deployed"] = "true"
                                     }
                                 }
                             });
@@ -644,19 +622,23 @@ var totalVMFields = 1;
             });
         }
         
+        // Used to save the current topology to the database.
         function saveTopology(){
+            // Stores all nodes and edges in an object.
             topology = {
                 nodes: JSON.stringify(nodes.get(), null, 4),
                 edges: JSON.stringify(edges.get(), null, 4)
             }
+            // Ensures nodes and edges exist in the network topology.
             if ((nodes.get().length) == 0 || (edges.get().length == 0)){
                 $.alert("There must be nodes and edges in the topology before saving it.");
                 return;
             }
             var newTopologyName = [];
-			$(".newTopologyForm input:text").each(function(){
+            $(".newTopologyForm input:text").each(function(){
                 newTopologyName.push($(this).val());
             });
+            // Sends the AJAX message to the backend.
             $.ajax({
                 csrfmiddlewaretoken: '{{ csrf_token }}',
                 method: 'POST',
@@ -666,12 +648,14 @@ var totalVMFields = 1;
             })
         }
         
+        // Loads a topology from a database which is selected in a dropdown menu to the user. 
         function returnTopology(){
             // This will be changed to accept user input later.
             var returnedNodes = [];
             var returnedEdges = [];
             var e = document.getElementById("top_name_retrieve");
-			var topology_name = e.options[e.selectedIndex].text;
+            var topology_name = e.options[e.selectedIndex].text;
+            // Confirmation field before continuing with the database call.
             $.confirm({
                 title: 'Retrieve Topology',
                 content: 'The topology named' + topology_name + ' will be retrieved and placed into your Network.',
@@ -704,9 +688,10 @@ var totalVMFields = 1;
             });
         }
         
-		function deleteTemplate(){
-			var e = document.getElementById("top_name_retrieve");
-			var topology_name = e.options[e.selectedIndex].text;
+        // Delete a template from the database.
+        function deleteTemplate(){
+            var e = document.getElementById("top_name_retrieve");
+            var topology_name = e.options[e.selectedIndex].text;
             $.confirm({
                 title: 'Delete Topology',
                 content: 'The topology named' + topology_name + ' will be permanently deleted from the database.',
@@ -731,8 +716,9 @@ var totalVMFields = 1;
                 }
             });
 
-		}
+        }
         
+        // Adds the topology returned from the database to the network topology.
         function addTopology(returnedNodes, returnedEdges){
             if (returnedNodes.length > 0){
                 for (var i = 0; i < returnedNodes.length; ++i){
@@ -746,7 +732,9 @@ var totalVMFields = 1;
             }
         }
         
+        // Used to remove instances (VMs) from OpenStack. 
         function tearDown(){
+              // removedNodes is a global variable which is an array. It is populated when a user removes VMs from the topology that are deployed.
               if(removedNodes.length > 0){
                   $.confirm({
                     title: 'Confirm Teardown',
@@ -762,9 +750,9 @@ var totalVMFields = 1;
                                         url: '/Home/NetworkTopology/',
                                         dataType: 'json',
                                         data: "[{'action': 'teardown'}," + "[{'removed_nodes':" + "'" + JSON.stringify(removedNodes) + "'" + "}]]",
-										success: function(data){
-											removedNodes = [];
-										}
+                                        success: function(data){
+                                            removedNodes = [];
+                                        }
                                 });
                             },
                         },
@@ -781,6 +769,7 @@ var totalVMFields = 1;
               }
         }
 
+        // Used to add a connection between two nodes.
         function addEdge(nodeID, firstNode, secondNode) {
             try {
                 edges.add({
@@ -793,46 +782,22 @@ var totalVMFields = 1;
                 alert(err);
             }
         }
-        function updateEdge() {
-            try {
-                edges.update({
-                    id: document.getElementById('edge-id').value,
-                    from: document.getElementById('edge-from').value,
-                    to: document.getElementById('edge-to').value
-                });
-            }
-            catch (err) {
-                alert(err);
-            }
-        }
         
-        
-        function removeEdge() {
-            try {
-                edges.remove({id: document.getElementById('edge-id').value});
-            }
-            catch (err) {
-                alert(err);
-            }
-        }
-        
-        
+        // Main draw function. Initialises all of the necessary global variables which are used elsewhere to add/remove nodes & edges from the topology.
         function draw() {
             // create an array with nodes
             nodes = new vis.DataSet();
+            // Reads the JSON from the pre-formatted nodes field.
             nodes.on('*', function () {
                 document.getElementById('nodes').innerHTML = JSON.stringify(nodes.get(), undefined, 4);
             });
-            //nodes.add([
-            //]);
 
             // create an array with edges
             edges = new vis.DataSet();
+            // Reads the JSON from the pre-formatted edges field.
             edges.on('*', function () {
                 document.getElementById('edges').innerHTML = JSON.stringify(edges.get(), null, 4);
             });
-            //edges.add([
-            //]);
 
             // create a network
             var container = document.getElementById('network');
@@ -844,6 +809,7 @@ var totalVMFields = 1;
                                 hover:true,
                                 selectable:true
             }};
+            
             // Create the network.
             network = new vis.Network(container, data, options);
             network.setOptions(options);
@@ -855,6 +821,7 @@ var totalVMFields = 1;
                 }else{
                     secondSelected = network.getSelectedNodes();
                 }
+                // If two nodes have been selected.
                 if(firstSelected.length == 1 && secondSelected.length == 1){
                         var linkCreated = false;
                         upperLoop:

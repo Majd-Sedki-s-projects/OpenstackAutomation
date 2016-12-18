@@ -41,6 +41,7 @@ def network_topology(request):
                         proj_name="admin", user_domain="default", project_domain="default")
     session = auth.start_auth()
     utilities = Utils(session=session)
+    flavor = StartInstance(session)
     glance = GlanceCommunication(session)
     completed_groups = []
 
@@ -62,6 +63,7 @@ def network_topology(request):
                     if device_id.get("group") in completed_groups:
                         print("Group already deployed")
                     else:
+                        print("DEPLOYED?: " + str(device_id.get("deployed")))
                         if device_id.get("deployed") == "false":
                             if device_id.get("type") == 'vm':
                                 num_vms = device_id.get("numVMs")

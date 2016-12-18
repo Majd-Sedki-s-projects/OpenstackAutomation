@@ -29,7 +29,12 @@ class StartInstance(object):
         #server = nova.servers.find(id=server.id)
         #if server.status == 'ACTIVE':
         return nova, True
- 
+
+    def getFlavors(self):
+        nova = nova_client.Client("2.1", session=self.session)
+        flavor = nova.flavors.list()
+        return flavor
+
     def add_security_to_server(self, server_name, security_group_name):
         nova = nova_client.Client(NOVA_CLIENT_VERSION, session=self.session)
         server = nova.servers.find(name=server_name)
