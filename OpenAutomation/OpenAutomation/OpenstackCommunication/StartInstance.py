@@ -8,7 +8,7 @@ class StartInstance(object):
         self.session = sess
 
     def start_instance(self, server_name, image, size, userdata, network_id):
-        nova = nova_client.Client("2.1", session=self.session)
+        nova = nova_client.Client(NOVA_CLIENT_VERSION, session=self.session)
         flavour = nova.flavors.find(name=size)
         image = nova.images.find(name=image)
         #network = nova_client.networks.find(name="public")
@@ -31,7 +31,7 @@ class StartInstance(object):
         return nova, True
 
     def getFlavors(self):
-        nova = nova_client.Client("2.1", session=self.session)
+        nova = nova_client.Client(NOVA_CLIENT_VERSION, session=self.session)
         flavor = nova.flavors.list()
         return flavor
 
